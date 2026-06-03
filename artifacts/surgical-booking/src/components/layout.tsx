@@ -7,11 +7,15 @@ import {
   Activity,
   PlusCircle,
   Stethoscope,
-  DoorOpen
+  DoorOpen,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/auth";
+import { Button } from "@/components/ui/button";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { href: "/", label: "Vezérlőpult", icon: LayoutDashboard },
@@ -56,6 +60,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+        <div className="p-4 border-t">
+          <div className="text-xs text-muted-foreground mb-2 px-1 truncate">{user?.username}</div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            onClick={logout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Kijelentkezés
+          </Button>
+        </div>
       </aside>
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header className="h-16 border-b bg-card flex items-center px-8 shadow-sm z-10">
