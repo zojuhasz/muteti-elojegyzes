@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { z } from "zod";
 import { db, dailyRostersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, lte, sql } from "drizzle-orm";
 import { GetDailyRosterResponse, UpsertDailyRosterBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -13,11 +13,23 @@ router.get("/daily-rosters/:date", async (req, res): Promise<void> => {
     return;
   }
   const [row] = await db.select().from(dailyRostersTable).where(eq(dailyRostersTable.date, date));
-  if (!row) {
+  if (row) {
+    res.json(GetDailyRosterResponse.parse(row));
+    return;
+  }
+  // No roster for this date — return the most recent prior roster as a template (without id/date)
+  const [latest] = await db
+    .select()
+    .from(dailyRostersTable)
+    .where(lte(dailyRostersTable.date, date))
+    .orderBy(sql`${dailyRostersTable.date} DESC`)
+    .limit(1);
+  if (!latest) {
     res.status(404).json({ error: "Not found" });
     return;
   }
-  res.json(GetDailyRosterResponse.parse(row));
+  // Return a synthetic roster: same field values but no id/date so the client knows it's a fallback
+  res.json(GetDailyRosterResponse.parse({ ...latest, id: 0, date }));
 });
 
 router.put("/daily-rosters/:date", async (req, res): Promise<void> => {

@@ -161,6 +161,7 @@ export default function SurgeryCalendar() {
   const abs = rosterVal(roster?.absent);
   const startTime = rosterVal(roster?.surgeryStartTime);
   const hasRoster = r1 || r2 || a1 || a2 || amb || dayoff || abs || startTime;
+  const isFallback = !!roster && roster.id === 0;
 
   return (
     <div className="space-y-4">
@@ -296,15 +297,18 @@ export default function SurgeryCalendar() {
           <CardTitle className="text-sm flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
             Napi beosztás
+            {isFallback && (
+              <span className="text-[10px] font-normal text-muted-foreground italic">(előző napból másolva)</span>
+            )}
             <Button variant="ghost" size="sm" className="ml-auto h-7 px-2" onClick={openRosterEdit}>
               <Pencil className="w-3.5 h-3.5 mr-1" />
-              {hasRoster ? "Szerkesztés" : "Kitöltés"}
+              {isFallback ? "Szerkesztés / Mentés" : hasRoster ? "Szerkesztés" : "Kitöltés"}
             </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-3">
           {!hasRoster ? (
-            <p className="text-xs text-muted-foreground italic">Még nincs beosztás erre a napra. Kattintson a Kitöltés gombra.</p>
+            <p className="text-xs text-muted-foreground italic">Még nincs beosztás erre a napra.</p>
           ) : (
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs md:grid-cols-3 lg:grid-cols-4">
               {(r1 || r2) && (
