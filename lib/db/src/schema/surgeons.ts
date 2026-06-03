@@ -8,6 +8,7 @@ export const surgeonsTable = pgTable("surgeons", {
   firstName: text("first_name").notNull(),
   specialty: text("specialty"),
   phone: text("phone"),
+  username: text("username"),
   isActive: boolean("is_active").notNull().default(true),
 });
 
