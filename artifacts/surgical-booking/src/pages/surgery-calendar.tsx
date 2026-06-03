@@ -171,11 +171,8 @@ export default function SurgeryCalendar() {
                           onClick={e => e.stopPropagation()}
                           data-testid={`cal-surgery-${s.id}`}
                         >
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="font-bold text-[12px]">{format(new Date(s.scheduledDate), "HH:mm")}</span>
-                            <span className="font-semibold truncate">
-                              {s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}
-                            </span>
+                          <div className="font-semibold truncate">
+                            {s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}
                           </div>
                           {s.patient?.diagnosis && (
                             <div className="truncate" style={{ opacity: 0.8 }}>{s.patient.diagnosis}</div>
