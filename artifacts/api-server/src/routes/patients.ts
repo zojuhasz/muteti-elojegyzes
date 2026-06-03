@@ -53,7 +53,8 @@ router.get("/patients", async (req, res): Promise<void> => {
 
   const patients = await db.select().from(patientsTable)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(patientsTable.lastName);
+    .orderBy(patientsTable.lastName)
+    .limit(search ? 20 : 0);
 
   res.json(ListPatientsResponse.parse(patients));
 });
