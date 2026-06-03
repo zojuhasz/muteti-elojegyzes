@@ -9,6 +9,8 @@
 export interface OperatingRoomInput {
   /** @minLength 1 */
   name: string;
+  /** @minLength 1 */
+  code: string;
   description?: string;
   isActive?: boolean;
 }

@@ -7,6 +7,7 @@
  */
 
 export * from './dashboardStats';
+export * from './getAdmissionCalendarParams';
 export * from './getCalendarSurgeriesParams';
 export * from './healthStatus';
 export * from './listPatientsParams';

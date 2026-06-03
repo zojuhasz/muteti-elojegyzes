@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const operatingRoomsTable = pgTable("operating_rooms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  code: text("code").notNull().default(""),
   description: text("description"),
   isActive: boolean("is_active").notNull().default(true),
 });

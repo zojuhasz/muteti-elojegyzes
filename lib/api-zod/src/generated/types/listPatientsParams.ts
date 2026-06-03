@@ -10,4 +10,6 @@ import type { ListPatientsStatus } from './listPatientsStatus';
 export type ListPatientsParams = {
 search?: string;
 status?: ListPatientsStatus;
+patientType?: string;
+admissionDate?: string;
 };

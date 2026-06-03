@@ -1,11 +1,16 @@
 import { Router, type IRouter } from "express";
+import { z } from "zod";
 import { db, operatingRoomsTable } from "@workspace/db";
-import {
-  ListOperatingRoomsResponse,
-  CreateOperatingRoomBody,
-} from "@workspace/api-zod";
+import { ListOperatingRoomsResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
+
+const CreateOperatingRoomBody = z.object({
+  name: z.string(),
+  code: z.string().optional(),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
 
 router.get("/operating-rooms", async (_req, res): Promise<void> => {
   const rooms = await db.select().from(operatingRoomsTable).orderBy(operatingRoomsTable.name);

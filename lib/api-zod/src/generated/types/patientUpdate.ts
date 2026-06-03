@@ -18,4 +18,6 @@ export interface PatientUpdate {
   notes?: string;
   diagnosis?: string;
   status?: PatientUpdateStatus;
+  patientType?: string;
+  admissionDate?: string;
 }

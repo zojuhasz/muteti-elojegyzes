@@ -10,7 +10,8 @@ import Surgeries from "@/pages/surgeries";
 import NewBooking from "@/pages/new-booking";
 import Surgeons from "@/pages/surgeons";
 import OperatingRooms from "@/pages/operating-rooms";
-import CalendarPage from "@/pages/calendar";
+import AdmissionCalendar from "@/pages/admission-calendar";
+import SurgeryCalendar from "@/pages/surgery-calendar";
 import Layout from "@/components/layout";
 
 const queryClient = new QueryClient();
@@ -20,7 +21,8 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
-        <Route path="/naptar" component={CalendarPage} />
+        <Route path="/felvetel" component={AdmissionCalendar} />
+        <Route path="/naptar" component={SurgeryCalendar} />
         <Route path="/betegek/:id" component={PatientDetail} />
         <Route path="/betegek" component={Patients} />
         <Route path="/mutetek" component={Surgeries} />

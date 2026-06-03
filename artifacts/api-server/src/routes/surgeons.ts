@@ -1,11 +1,18 @@
 import { Router, type IRouter } from "express";
+import { z } from "zod";
 import { db, surgeonsTable } from "@workspace/db";
-import {
-  ListSurgeonsResponse,
-  CreateSurgeonBody,
-} from "@workspace/api-zod";
+import { ListSurgeonsResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
+
+const CreateSurgeonBody = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  specialization: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
 
 router.get("/surgeons", async (_req, res): Promise<void> => {
   const surgeons = await db.select().from(surgeonsTable).orderBy(surgeonsTable.lastName);

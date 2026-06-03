@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -12,6 +12,8 @@ export const patientsTable = pgTable("patients", {
   notes: text("notes"),
   diagnosis: text("diagnosis"),
   status: text("status").notNull().default("waiting"),
+  patientType: text("patient_type"),
+  admissionDate: text("admission_date"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

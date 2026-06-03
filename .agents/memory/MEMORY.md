@@ -1,0 +1,3 @@
+- [Orval queryKey naming](orval-querykey-naming.md) — generated queryKey helpers are always prefixed with an extra "get": `getGet<HookName>QueryKey`, not `get<HookName>QueryKey`.
+- [API server zod imports](api-server-zod.md) — use `import { z } from "zod"` (not "zod/v4") in api-server routes; bypass generated date schemas with inline z.string().
+- [OpenAPI-driven Create bodies](openapi-create-bodies.md) — only schema types explicitly in the OpenAPI spec are generated; inline Zod schemas in routes for types not in spec.

@@ -50,6 +50,14 @@ paths:
           schema:
             type: string
             enum: [waiting, scheduled, operated, cancelled]
+        - name: patientType
+          in: query
+          schema:
+            type: string
+        - name: admissionDate
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: Betegek listája
@@ -100,7 +108,7 @@ paths:
     patch:
       operationId: updatePatient
       tags: [patients]
-      summary: Beteg adatainak módosítása
+      summary: Beteg módosítása
       parameters:
         - name: id
           in: path
@@ -152,23 +160,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/OperatingRoom"
-    post:
-      operationId: createOperatingRoom
-      tags: [operating-rooms]
-      summary: Új műtőterem
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OperatingRoomInput"
-      responses:
-        "201":
-          description: Műtőterem létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OperatingRoom"
 
   /surgeons:
     get:
@@ -184,23 +175,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Surgeon"
-    post:
-      operationId: createSurgeon
-      tags: [surgeons]
-      summary: Új sebész
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SurgeonInput"
-      responses:
-        "201":
-          description: Sebész létrehozva
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Surgeon"
 
   /surgeries:
     get:
@@ -218,6 +192,10 @@ paths:
           schema:
             type: integer
         - name: surgeonId
+          in: query
+          schema:
+            type: integer
+        - name: patientId
           in: query
           schema:
             type: integer
@@ -331,7 +309,7 @@ paths:
     get:
       operationId: getCalendarSurgeries
       tags: [dashboard]
-      summary: Naptár nézet műtétekkel
+      summary: Műtéti naptár nézet
       parameters:
         - name: from
           in: query
@@ -354,6 +332,34 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Surgery"
+
+  /dashboard/admission-calendar:
+    get:
+      operationId: getAdmissionCalendar
+      tags: [dashboard]
+      summary: Felvételi naptár nézet
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Betegek felvételi adatai a megadott időszakban
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Patient"
 
   /dashboard/recent:
     get:
@@ -404,6 +410,12 @@ components:
         status:
           type: string
           enum: [waiting, scheduled, operated, cancelled]
+        patientType:
+          type: ["string", "null"]
+          description: "Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős"
+        admissionDate:
+          type: ["string", "null"]
+          description: "Tervezett felvételi dátum (YYYY-MM-DD)"
         createdAt:
           type: string
           format: date-time
@@ -435,6 +447,12 @@ components:
         status:
           type: string
           enum: [waiting, scheduled, operated, cancelled]
+        patientType:
+          type: string
+          description: "T, J, vagy S"
+        admissionDate:
+          type: string
+          description: "YYYY-MM-DD formátum"
 
     PatientUpdate:
       type: object
@@ -459,15 +477,22 @@ components:
         status:
           type: string
           enum: [waiting, scheduled, operated, cancelled]
+        patientType:
+          type: string
+        admissionDate:
+          type: string
 
     OperatingRoom:
       type: object
-      required: [id, name]
+      required: [id, name, code]
       properties:
         id:
           type: integer
         name:
           type: string
+        code:
+          type: string
+          description: "Műtőterem kódja (5, 6, 7, 8, A)"
         description:
           type: ["string", "null"]
         isActive:
@@ -475,9 +500,12 @@ components:
 
     OperatingRoomInput:
       type: object
-      required: [name]
+      required: [name, code]
       properties:
         name:
+          type: string
+          minLength: 1
+        code:
           type: string
           minLength: 1
         description:

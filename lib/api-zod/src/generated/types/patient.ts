@@ -21,6 +21,16 @@ export interface Patient {
   /** @nullable */
   diagnosis?: string | null;
   status: PatientStatus;
+  /**
+     * Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős
+     * @nullable
+     */
+  patientType?: string | null;
+  /**
+     * Tervezett felvételi dátum (YYYY-MM-DD)
+     * @nullable
+     */
+  admissionDate?: string | null;
   createdAt: Date;
   updatedAt?: Date;
 }

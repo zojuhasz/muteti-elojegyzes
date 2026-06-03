@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
 import { eq, and, gte, lte, count, sql } from "drizzle-orm";
-import { db, patientsTable, surgeriesTable, surgeonsTable, operatingRoomsTable } from "@workspace/db";
 import { z } from "zod";
+import { db, patientsTable, surgeriesTable, surgeonsTable, operatingRoomsTable } from "@workspace/db";
 import {
   GetDashboardStatsResponse,
   GetCalendarSurgeriesResponse,
   GetRecentActivityResponse,
+  GetAdmissionCalendarResponse,
 } from "@workspace/api-zod";
 
 const CalendarQueryParams = z.object({
@@ -101,6 +102,25 @@ router.get("/dashboard/calendar", async (req, res): Promise<void> => {
   }));
 
   res.json(GetCalendarSurgeriesResponse.parse(surgeries));
+});
+
+router.get("/dashboard/admission-calendar", async (req, res): Promise<void> => {
+  const parsed = CalendarQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { from, to } = parsed.data;
+
+  const patients = await db.select().from(patientsTable)
+    .where(and(
+      gte(patientsTable.admissionDate, from),
+      lte(patientsTable.admissionDate, to),
+    ))
+    .orderBy(patientsTable.admissionDate, patientsTable.lastName);
+
+  res.json(GetAdmissionCalendarResponse.parse(patients));
 });
 
 router.get("/dashboard/recent", async (_req, res): Promise<void> => {

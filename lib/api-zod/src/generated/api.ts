@@ -22,7 +22,9 @@ export const HealthCheckResponse = zod.object({
  */
 export const ListPatientsQueryParams = zod.object({
   "search": zod.coerce.string().optional(),
-  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional()
+  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional(),
+  "patientType": zod.coerce.string().optional(),
+  "admissionDate": zod.coerce.string().optional()
 })
 
 export const ListPatientsResponseItem = zod.object({
@@ -35,6 +37,8 @@ export const ListPatientsResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -56,7 +60,9 @@ export const CreatePatientBody = zod.object({
   "phone": zod.string().optional(),
   "notes": zod.string().optional(),
   "diagnosis": zod.string().optional(),
-  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional()
+  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional(),
+  "patientType": zod.string().optional().describe('T, J, vagy S'),
+  "admissionDate": zod.string().optional().describe('YYYY-MM-DD formátum')
 })
 
 
@@ -77,13 +83,15 @@ export const GetPatientResponse = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
 
 
 /**
- * @summary Beteg adatainak módosítása
+ * @summary Beteg módosítása
  */
 export const UpdatePatientParams = zod.object({
   "id": zod.coerce.number()
@@ -101,7 +109,9 @@ export const UpdatePatientBody = zod.object({
   "phone": zod.string().optional(),
   "notes": zod.string().optional(),
   "diagnosis": zod.string().optional(),
-  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional()
+  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']).optional(),
+  "patientType": zod.string().optional(),
+  "admissionDate": zod.string().optional()
 })
 
 export const UpdatePatientResponse = zod.object({
@@ -114,6 +124,8 @@ export const UpdatePatientResponse = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -133,23 +145,11 @@ export const DeletePatientParams = zod.object({
 export const ListOperatingRoomsResponseItem = zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 })
 export const ListOperatingRoomsResponse = zod.array(ListOperatingRoomsResponseItem)
-
-
-/**
- * @summary Új műtőterem
- */
-
-
-
-export const CreateOperatingRoomBody = zod.object({
-  "name": zod.string().min(1),
-  "description": zod.string().optional(),
-  "isActive": zod.boolean().optional()
-})
 
 
 /**
@@ -167,28 +167,13 @@ export const ListSurgeonsResponse = zod.array(ListSurgeonsResponseItem)
 
 
 /**
- * @summary Új sebész
- */
-
-
-
-
-export const CreateSurgeonBody = zod.object({
-  "lastName": zod.string().min(1),
-  "firstName": zod.string().min(1),
-  "specialty": zod.string().optional(),
-  "phone": zod.string().optional(),
-  "isActive": zod.boolean().optional()
-})
-
-
-/**
  * @summary Műtéti előjegyzések listázása
  */
 export const ListSurgeriesQueryParams = zod.object({
   "date": zod.date().optional(),
   "operatingRoomId": zod.coerce.number().optional(),
   "surgeonId": zod.coerce.number().optional(),
+  "patientId": zod.coerce.number().optional(),
   "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional()
 })
 
@@ -212,12 +197,15 @@ export const ListSurgeriesResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
   "operatingRoom": zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 }).optional(),
@@ -277,12 +265,15 @@ export const GetSurgeryResponse = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
   "operatingRoom": zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 }).optional(),
@@ -337,12 +328,15 @@ export const UpdateSurgeryResponse = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
   "operatingRoom": zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 }).optional(),
@@ -382,7 +376,7 @@ export const GetDashboardStatsResponse = zod.object({
 
 
 /**
- * @summary Naptár nézet műtétekkel
+ * @summary Műtéti naptár nézet
  */
 export const GetCalendarSurgeriesQueryParams = zod.object({
   "from": zod.date(),
@@ -409,12 +403,15 @@ export const GetCalendarSurgeriesResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
   "operatingRoom": zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 }).optional(),
@@ -430,6 +427,32 @@ export const GetCalendarSurgeriesResponseItem = zod.object({
   "updatedAt": zod.coerce.date().optional()
 })
 export const GetCalendarSurgeriesResponse = zod.array(GetCalendarSurgeriesResponseItem)
+
+
+/**
+ * @summary Felvételi naptár nézet
+ */
+export const GetAdmissionCalendarQueryParams = zod.object({
+  "from": zod.date(),
+  "to": zod.date()
+})
+
+export const GetAdmissionCalendarResponseItem = zod.object({
+  "id": zod.number(),
+  "lastName": zod.string(),
+  "firstName": zod.string(),
+  "birthDate": zod.coerce.date(),
+  "taj": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "notes": zod.string().nullish(),
+  "diagnosis": zod.string().nullish(),
+  "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date().optional()
+})
+export const GetAdmissionCalendarResponse = zod.array(GetAdmissionCalendarResponseItem)
 
 
 /**
@@ -455,12 +478,15 @@ export const GetRecentActivityResponseItem = zod.object({
   "notes": zod.string().nullish(),
   "diagnosis": zod.string().nullish(),
   "status": zod.enum(['waiting', 'scheduled', 'operated', 'cancelled']),
+  "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
+  "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
   "operatingRoom": zod.object({
   "id": zod.number(),
   "name": zod.string(),
+  "code": zod.string().describe('Műtőterem kódja (5, 6, 7, 8, A)'),
   "description": zod.string().nullish(),
   "isActive": zod.boolean().optional()
 }).optional(),

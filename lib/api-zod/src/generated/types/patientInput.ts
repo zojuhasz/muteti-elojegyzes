@@ -18,4 +18,8 @@ export interface PatientInput {
   notes?: string;
   diagnosis?: string;
   status?: PatientInputStatus;
+  /** T, J, vagy S */
+  patientType?: string;
+  /** YYYY-MM-DD formátum */
+  admissionDate?: string;
 }

@@ -11,5 +11,6 @@ export type ListSurgeriesParams = {
 date?: Date;
 operatingRoomId?: number;
 surgeonId?: number;
+patientId?: number;
 status?: ListSurgeriesStatus;
 };

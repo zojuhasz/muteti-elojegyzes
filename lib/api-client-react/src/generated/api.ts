@@ -21,17 +21,16 @@ import type {
 
 import type {
   DashboardStats,
+  GetAdmissionCalendarParams,
   GetCalendarSurgeriesParams,
   HealthStatus,
   ListPatientsParams,
   ListSurgeriesParams,
   OperatingRoom,
-  OperatingRoomInput,
   Patient,
   PatientInput,
   PatientUpdate,
   Surgeon,
-  SurgeonInput,
   Surgery,
   SurgeryInput,
   SurgeryUpdate
@@ -368,7 +367,7 @@ export const getUpdatePatientUrl = (id: number,) => {
 }
 
 /**
- * @summary Beteg adatainak módosítása
+ * @summary Beteg módosítása
  */
 export const updatePatient = async (id: number,
     patientUpdate: PatientUpdate, options?: RequestInit): Promise<Patient> => {
@@ -418,7 +417,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdatePatientMutationError = ErrorType<void>
 
     /**
- * @summary Beteg adatainak módosítása
+ * @summary Beteg módosítása
  */
 export const useUpdatePatient = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePatient>>, TError,{id: number;data: BodyType<PatientUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -578,77 +577,6 @@ export function useListOperatingRooms<TData = Awaited<ReturnType<typeof listOper
 
 
 
-export const getCreateOperatingRoomUrl = () => {
-
-
-
-
-  return `/api/operating-rooms`
-}
-
-/**
- * @summary Új műtőterem
- */
-export const createOperatingRoom = async (operatingRoomInput: OperatingRoomInput, options?: RequestInit): Promise<OperatingRoom> => {
-
-  return customFetch<OperatingRoom>(getCreateOperatingRoomUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      operatingRoomInput,)
-  }
-);}
-
-
-
-
-export const getCreateOperatingRoomMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOperatingRoom>>, TError,{data: BodyType<OperatingRoomInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createOperatingRoom>>, TError,{data: BodyType<OperatingRoomInput>}, TContext> => {
-
-const mutationKey = ['createOperatingRoom'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createOperatingRoom>>, {data: BodyType<OperatingRoomInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createOperatingRoom(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateOperatingRoomMutationResult = NonNullable<Awaited<ReturnType<typeof createOperatingRoom>>>
-    export type CreateOperatingRoomMutationBody = BodyType<OperatingRoomInput>
-    export type CreateOperatingRoomMutationError = ErrorType<unknown>
-
-    /**
- * @summary Új műtőterem
- */
-export const useCreateOperatingRoom = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createOperatingRoom>>, TError,{data: BodyType<OperatingRoomInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createOperatingRoom>>,
-        TError,
-        {data: BodyType<OperatingRoomInput>},
-        TContext
-      > => {
-      return useMutation(getCreateOperatingRoomMutationOptions(options));
-    }
-
 export const getListSurgeonsUrl = () => {
 
 
@@ -725,77 +653,6 @@ export function useListSurgeons<TData = Awaited<ReturnType<typeof listSurgeons>>
 
 
 
-
-export const getCreateSurgeonUrl = () => {
-
-
-
-
-  return `/api/surgeons`
-}
-
-/**
- * @summary Új sebész
- */
-export const createSurgeon = async (surgeonInput: SurgeonInput, options?: RequestInit): Promise<Surgeon> => {
-
-  return customFetch<Surgeon>(getCreateSurgeonUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      surgeonInput,)
-  }
-);}
-
-
-
-
-export const getCreateSurgeonMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSurgeon>>, TError,{data: BodyType<SurgeonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createSurgeon>>, TError,{data: BodyType<SurgeonInput>}, TContext> => {
-
-const mutationKey = ['createSurgeon'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSurgeon>>, {data: BodyType<SurgeonInput>}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createSurgeon(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateSurgeonMutationResult = NonNullable<Awaited<ReturnType<typeof createSurgeon>>>
-    export type CreateSurgeonMutationBody = BodyType<SurgeonInput>
-    export type CreateSurgeonMutationError = ErrorType<unknown>
-
-    /**
- * @summary Új sebész
- */
-export const useCreateSurgeon = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSurgeon>>, TError,{data: BodyType<SurgeonInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof createSurgeon>>,
-        TError,
-        {data: BodyType<SurgeonInput>},
-        TContext
-      > => {
-      return useMutation(getCreateSurgeonMutationOptions(options));
-    }
 
 export const getListSurgeriesUrl = (params?: ListSurgeriesParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -1264,7 +1121,7 @@ export const getGetCalendarSurgeriesUrl = (params: GetCalendarSurgeriesParams,) 
 }
 
 /**
- * @summary Naptár nézet műtétekkel
+ * @summary Műtéti naptár nézet
  */
 export const getCalendarSurgeries = async (params: GetCalendarSurgeriesParams, options?: RequestInit): Promise<Surgery[]> => {
 
@@ -1311,7 +1168,7 @@ export type GetCalendarSurgeriesQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Naptár nézet műtétekkel
+ * @summary Műtéti naptár nézet
  */
 
 export function useGetCalendarSurgeries<TData = Awaited<ReturnType<typeof getCalendarSurgeries>>, TError = ErrorType<unknown>>(
@@ -1320,6 +1177,90 @@ export function useGetCalendarSurgeries<TData = Awaited<ReturnType<typeof getCal
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetCalendarSurgeriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAdmissionCalendarUrl = (params: GetAdmissionCalendarParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dashboard/admission-calendar?${stringifiedParams}` : `/api/dashboard/admission-calendar`
+}
+
+/**
+ * @summary Felvételi naptár nézet
+ */
+export const getAdmissionCalendar = async (params: GetAdmissionCalendarParams, options?: RequestInit): Promise<Patient[]> => {
+
+  return customFetch<Patient[]>(getGetAdmissionCalendarUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdmissionCalendarQueryKey = (params?: GetAdmissionCalendarParams,) => {
+    return [
+    `/api/dashboard/admission-calendar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetAdmissionCalendarQueryOptions = <TData = Awaited<ReturnType<typeof getAdmissionCalendar>>, TError = ErrorType<unknown>>(params: GetAdmissionCalendarParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdmissionCalendar>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdmissionCalendarQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdmissionCalendar>>> = ({ signal }) => getAdmissionCalendar(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdmissionCalendar>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdmissionCalendarQueryResult = NonNullable<Awaited<ReturnType<typeof getAdmissionCalendar>>>
+export type GetAdmissionCalendarQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Felvételi naptár nézet
+ */
+
+export function useGetAdmissionCalendar<TData = Awaited<ReturnType<typeof getAdmissionCalendar>>, TError = ErrorType<unknown>>(
+ params: GetAdmissionCalendarParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdmissionCalendar>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdmissionCalendarQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

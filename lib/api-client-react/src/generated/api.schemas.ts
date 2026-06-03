@@ -33,6 +33,16 @@ export interface Patient {
   /** @nullable */
   diagnosis?: string | null;
   status: PatientStatus;
+  /**
+     * Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős
+     * @nullable
+     */
+  patientType?: string | null;
+  /**
+     * Tervezett felvételi dátum (YYYY-MM-DD)
+     * @nullable
+     */
+  admissionDate?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -58,6 +68,10 @@ export interface PatientInput {
   notes?: string;
   diagnosis?: string;
   status?: PatientInputStatus;
+  /** T, J, vagy S */
+  patientType?: string;
+  /** YYYY-MM-DD formátum */
+  admissionDate?: string;
 }
 
 export type PatientUpdateStatus = typeof PatientUpdateStatus[keyof typeof PatientUpdateStatus];
@@ -81,11 +95,15 @@ export interface PatientUpdate {
   notes?: string;
   diagnosis?: string;
   status?: PatientUpdateStatus;
+  patientType?: string;
+  admissionDate?: string;
 }
 
 export interface OperatingRoom {
   id: number;
   name: string;
+  /** Műtőterem kódja (5, 6, 7, 8, A) */
+  code: string;
   /** @nullable */
   description?: string | null;
   isActive?: boolean;
@@ -94,6 +112,8 @@ export interface OperatingRoom {
 export interface OperatingRoomInput {
   /** @minLength 1 */
   name: string;
+  /** @minLength 1 */
+  code: string;
   description?: string;
   isActive?: boolean;
 }
@@ -204,6 +224,8 @@ export interface DashboardStats {
 export type ListPatientsParams = {
 search?: string;
 status?: ListPatientsStatus;
+patientType?: string;
+admissionDate?: string;
 };
 
 export type ListPatientsStatus = typeof ListPatientsStatus[keyof typeof ListPatientsStatus];
@@ -220,6 +242,7 @@ export type ListSurgeriesParams = {
 date?: string;
 operatingRoomId?: number;
 surgeonId?: number;
+patientId?: number;
 status?: ListSurgeriesStatus;
 };
 
@@ -234,6 +257,11 @@ export const ListSurgeriesStatus = {
 } as const;
 
 export type GetCalendarSurgeriesParams = {
+from: string;
+to: string;
+};
+
+export type GetAdmissionCalendarParams = {
 from: string;
 to: string;
 };

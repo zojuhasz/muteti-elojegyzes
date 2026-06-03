@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
-import { eq, ilike, or } from "drizzle-orm";
+import { eq, ilike, or, and } from "drizzle-orm";
+import { z } from "zod";
 import { db, patientsTable } from "@workspace/db";
 import {
-  ListPatientsQueryParams,
   ListPatientsResponse,
   GetPatientParams,
   GetPatientResponse,
@@ -15,16 +15,21 @@ import {
 
 const router: IRouter = Router();
 
+const ListPatientsQuery = z.object({
+  search: z.string().optional(),
+  status: z.enum(["waiting", "scheduled", "operated", "cancelled"]).optional(),
+  patientType: z.string().optional(),
+  admissionDate: z.string().optional(),
+});
+
 router.get("/patients", async (req, res): Promise<void> => {
-  const parsed = ListPatientsQueryParams.safeParse(req.query);
+  const parsed = ListPatientsQuery.safeParse(req.query);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
 
-  const { search, status } = parsed.data;
-
-  let query = db.select().from(patientsTable);
+  const { search, status, patientType, admissionDate } = parsed.data;
 
   const conditions = [];
   if (search) {
@@ -39,13 +44,16 @@ router.get("/patients", async (req, res): Promise<void> => {
   if (status) {
     conditions.push(eq(patientsTable.status, status));
   }
-
-  let patients;
-  if (conditions.length > 0) {
-    patients = await query.where(conditions.length === 1 ? conditions[0] : conditions[0]).orderBy(patientsTable.lastName);
-  } else {
-    patients = await query.orderBy(patientsTable.lastName);
+  if (patientType) {
+    conditions.push(eq(patientsTable.patientType, patientType));
   }
+  if (admissionDate) {
+    conditions.push(eq(patientsTable.admissionDate, admissionDate));
+  }
+
+  const patients = await db.select().from(patientsTable)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(patientsTable.lastName);
 
   res.json(ListPatientsResponse.parse(patients));
 });

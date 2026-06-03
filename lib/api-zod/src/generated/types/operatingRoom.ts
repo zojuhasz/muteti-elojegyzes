@@ -9,6 +9,8 @@
 export interface OperatingRoom {
   id: number;
   name: string;
+  /** Műtőterem kódja (5, 6, 7, 8, A) */
+  code: string;
   /** @nullable */
   description?: string | null;
   isActive?: boolean;
