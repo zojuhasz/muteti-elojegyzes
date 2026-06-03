@@ -561,3 +561,60 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(GetRecentActivityResponseItem)
 
 
+/**
+ * @summary Napi beosztás lekérdezése
+ */
+export const GetDailyRosterParams = zod.object({
+  "date": zod.date()
+})
+
+export const GetDailyRosterResponse = zod.object({
+  "id": zod.number(),
+  "date": zod.coerce.date(),
+  "surgeryResponsible1": zod.string().nullish(),
+  "surgeryResponsible2": zod.string().nullish(),
+  "acuteResponsible1": zod.string().nullish(),
+  "acuteResponsible2": zod.string().nullish(),
+  "ambulanceNotes": zod.string().nullish(),
+  "dayOff": zod.string().nullish(),
+  "absent": zod.string().nullish(),
+  "surgeryStartTime": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Napi beosztás mentése (upsert)
+ */
+export const UpsertDailyRosterParams = zod.object({
+  "date": zod.date()
+})
+
+export const UpsertDailyRosterBody = zod.object({
+  "surgeryResponsible1": zod.string().nullish(),
+  "surgeryResponsible2": zod.string().nullish(),
+  "acuteResponsible1": zod.string().nullish(),
+  "acuteResponsible2": zod.string().nullish(),
+  "ambulanceNotes": zod.string().nullish(),
+  "dayOff": zod.string().nullish(),
+  "absent": zod.string().nullish(),
+  "surgeryStartTime": zod.string().nullish()
+})
+
+export const UpsertDailyRosterResponse = zod.object({
+  "id": zod.number(),
+  "date": zod.coerce.date(),
+  "surgeryResponsible1": zod.string().nullish(),
+  "surgeryResponsible2": zod.string().nullish(),
+  "acuteResponsible1": zod.string().nullish(),
+  "acuteResponsible2": zod.string().nullish(),
+  "ambulanceNotes": zod.string().nullish(),
+  "dayOff": zod.string().nullish(),
+  "absent": zod.string().nullish(),
+  "surgeryStartTime": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+

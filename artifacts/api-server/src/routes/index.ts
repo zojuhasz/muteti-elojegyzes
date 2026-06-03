@@ -5,6 +5,7 @@ import operatingRoomsRouter from "./operatingRooms";
 import surgeonsRouter from "./surgeons";
 import surgeriesRouter from "./surgeries";
 import dashboardRouter from "./dashboard";
+import dailyRostersRouter from "./dailyRosters";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(operatingRoomsRouter);
 router.use(surgeonsRouter);
 router.use(surgeriesRouter);
 router.use(dashboardRouter);
+router.use(dailyRostersRouter);
 
 export default router;

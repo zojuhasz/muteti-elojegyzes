@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { useGetCalendarSurgeries, useListOperatingRooms, useListPatients, useListSurgeons, useCreateSurgery, useDeleteSurgery, getGetCalendarSurgeriesQueryKey } from "@workspace/api-client-react";
+import {
+  useGetCalendarSurgeries, useListOperatingRooms, useListPatients, useListSurgeons,
+  useCreateSurgery, useDeleteSurgery, getGetCalendarSurgeriesQueryKey,
+  useGetDailyRoster, useUpsertDailyRoster, getGetDailyRosterQueryKey,
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Pencil } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +43,10 @@ function assistants(p: { assistant1?: string | null; assistant2?: string | null;
     .filter((a): a is string => !!a && a.trim() !== "" && a.trim() !== "-");
 }
 
+function rosterVal(v: string | null | undefined) {
+  return v?.trim() && v.trim() !== "-" ? v.trim() : null;
+}
+
 type AssignState = { date: string; roomId: number; roomName: string } | null;
 
 export default function SurgeryCalendar() {
@@ -48,6 +57,13 @@ export default function SurgeryCalendar() {
   const [selTime, setSelTime] = useState("08:00");
   const [selType, setSelType] = useState("");
   const [selDuration, setSelDuration] = useState("");
+  const [rosterOpen, setRosterOpen] = useState(false);
+  const [rosterForm, setRosterForm] = useState({
+    surgeryResponsible1: "", surgeryResponsible2: "",
+    acuteResponsible1: "", acuteResponsible2: "",
+    ambulanceNotes: "", dayOff: "", absent: "", surgeryStartTime: "",
+  });
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -57,8 +73,10 @@ export default function SurgeryCalendar() {
   const { data: rooms } = useListOperatingRooms();
   const { data: patients } = useListPatients();
   const { data: surgeons } = useListSurgeons();
+  const { data: roster } = useGetDailyRoster(dayStr, { query: { queryKey: getGetDailyRosterQueryKey(dayStr), retry: false } });
   const createSurgery = useCreateSurgery();
   const deleteSurgery = useDeleteSurgery();
+  const upsertRoster = useUpsertDailyRoster();
 
   const activeRooms = rooms?.filter(r => r.isActive) ?? [];
 
@@ -70,11 +88,32 @@ export default function SurgeryCalendar() {
 
   function openAssign(roomId: number, roomName: string) {
     setAssign({ date: dayStr, roomId, roomName });
-    setSelPatient("");
-    setSelSurgeon("");
-    setSelTime("08:00");
-    setSelType("");
-    setSelDuration("");
+    setSelPatient(""); setSelSurgeon(""); setSelTime("08:00"); setSelType(""); setSelDuration("");
+  }
+
+  function openRosterEdit() {
+    setRosterForm({
+      surgeryResponsible1: roster?.surgeryResponsible1 ?? "",
+      surgeryResponsible2: roster?.surgeryResponsible2 ?? "",
+      acuteResponsible1: roster?.acuteResponsible1 ?? "",
+      acuteResponsible2: roster?.acuteResponsible2 ?? "",
+      ambulanceNotes: roster?.ambulanceNotes ?? "",
+      dayOff: roster?.dayOff ?? "",
+      absent: roster?.absent ?? "",
+      surgeryStartTime: roster?.surgeryStartTime ?? "",
+    });
+    setRosterOpen(true);
+  }
+
+  function handleRosterSave() {
+    upsertRoster.mutate({ date: dayStr, data: rosterForm }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetDailyRosterQueryKey(dayStr) });
+        toast({ title: "Beosztás mentve" });
+        setRosterOpen(false);
+      },
+      onError: () => toast({ title: "Hiba a mentés során", variant: "destructive" }),
+    });
   }
 
   function handleCreate() {
@@ -96,9 +135,7 @@ export default function SurgeryCalendar() {
         toast({ title: "Műtét előjegyezve" });
         setAssign(null);
       },
-      onError: () => {
-        toast({ title: "Hiba a mentés során", variant: "destructive" });
-      },
+      onError: () => toast({ title: "Hiba a mentés során", variant: "destructive" }),
     });
   }
 
@@ -115,8 +152,19 @@ export default function SurgeryCalendar() {
 
   const isToday = dayStr === format(new Date(), "yyyy-MM-dd");
 
+  const r1 = rosterVal(roster?.surgeryResponsible1);
+  const r2 = rosterVal(roster?.surgeryResponsible2);
+  const a1 = rosterVal(roster?.acuteResponsible1);
+  const a2 = rosterVal(roster?.acuteResponsible2);
+  const amb = rosterVal(roster?.ambulanceNotes);
+  const dayoff = rosterVal(roster?.dayOff);
+  const abs = rosterVal(roster?.absent);
+  const startTime = rosterVal(roster?.surgeryStartTime);
+  const hasRoster = r1 || r2 || a1 || a2 || amb || dayoff || abs || startTime;
+
   return (
     <div className="space-y-4">
+      {/* Navigáció */}
       <div className="flex items-center gap-3">
         <Button variant="outline" size="sm" onClick={() => setCurrentDay(d => subDays(d, 1))} data-testid="button-prev-day">
           <ChevronLeft className="w-4 h-4" />
@@ -132,9 +180,9 @@ export default function SurgeryCalendar() {
             Ma
           </Button>
         )}
-        <span className="text-xs text-muted-foreground ml-2">Kattintson egy műtőteremre az előjegyzéshez</span>
       </div>
 
+      {/* Műtőtermek */}
       {isLoading ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : (
@@ -201,11 +249,6 @@ export default function SurgeryCalendar() {
                       );
                     })
                   )}
-                  <div className="pt-1 flex justify-end">
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                      <Plus className="w-3 h-3" /> Előjegyez
-                    </span>
-                  </div>
                 </CardContent>
               </Card>
             );
@@ -213,6 +256,7 @@ export default function SurgeryCalendar() {
         </div>
       )}
 
+      {/* Sebész-jelmagyarázat */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
@@ -226,11 +270,8 @@ export default function SurgeryCalendar() {
               const bg = s.bgColor!;
               const text = s.textColor ?? autoTextColor(bg);
               return (
-                <div
-                  key={s.id}
-                  className="text-[11px] rounded border px-2 py-0.5"
-                  style={{ backgroundColor: bg, color: text, borderColor: bg }}
-                >
+                <div key={s.id} className="text-[11px] rounded border px-2 py-0.5"
+                  style={{ backgroundColor: bg, color: text, borderColor: bg }}>
                   Dr. {s.lastName}
                 </div>
               );
@@ -239,6 +280,128 @@ export default function SurgeryCalendar() {
         </CardContent>
       </Card>
 
+      {/* Napi beosztás panel */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader className="pb-2 pt-3 px-4">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            Napi beosztás
+            <Button variant="ghost" size="sm" className="ml-auto h-7 px-2" onClick={openRosterEdit}>
+              <Pencil className="w-3.5 h-3.5 mr-1" />
+              {hasRoster ? "Szerkesztés" : "Kitöltés"}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-3">
+          {!hasRoster ? (
+            <p className="text-xs text-muted-foreground italic">Még nincs beosztás erre a napra. Kattintson a Kitöltés gombra.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs md:grid-cols-3 lg:grid-cols-4">
+              {(r1 || r2) && (
+                <div>
+                  <span className="font-semibold text-muted-foreground">Műtét felelős: </span>
+                  <span>{[r1, r2].filter(Boolean).join(", ")}</span>
+                </div>
+              )}
+              {(a1 || a2) && (
+                <div>
+                  <span className="font-semibold text-muted-foreground">Akut felelős: </span>
+                  <span>{[a1, a2].filter(Boolean).join(", ")}</span>
+                </div>
+              )}
+              {startTime && (
+                <div>
+                  <span className="font-semibold text-muted-foreground">Műtétek kezdete: </span>
+                  <span className="font-medium">{startTime}</span>
+                </div>
+              )}
+              {amb && (
+                <div className="col-span-2">
+                  <span className="font-semibold text-muted-foreground">Ambulancia: </span>
+                  <span>{amb}</span>
+                </div>
+              )}
+              {dayoff && (
+                <div className="col-span-2">
+                  <span className="font-semibold text-muted-foreground">Szabadnap: </span>
+                  <span>{dayoff}</span>
+                </div>
+              )}
+              {abs && (
+                <div className="col-span-2">
+                  <span className="font-semibold text-muted-foreground">Egyéb távollevők: </span>
+                  <span>{abs}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Napi beosztás szerkesztő dialog */}
+      <Dialog open={rosterOpen} onOpenChange={setRosterOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-primary" />
+              Napi beosztás — {dayStr}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Műtét felelős 1.</Label>
+                <Input placeholder="Dr. Pára Márton" value={rosterForm.surgeryResponsible1}
+                  onChange={e => setRosterForm(f => ({ ...f, surgeryResponsible1: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Műtét felelős 2.</Label>
+                <Input placeholder="-" value={rosterForm.surgeryResponsible2}
+                  onChange={e => setRosterForm(f => ({ ...f, surgeryResponsible2: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Akut felelős 1.</Label>
+                <Input placeholder="Dr. Huszár Borbála" value={rosterForm.acuteResponsible1}
+                  onChange={e => setRosterForm(f => ({ ...f, acuteResponsible1: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Akut felelős 2.</Label>
+                <Input placeholder="-" value={rosterForm.acuteResponsible2}
+                  onChange={e => setRosterForm(f => ({ ...f, acuteResponsible2: e.target.value }))} />
+              </div>
+              <div className="space-y-1 col-span-2">
+                <Label className="text-xs">Ambulancia beosztás</Label>
+                <Textarea placeholder="9-12: dr.Svastics, dr.Szilágyi  12-15: dr.Papp, dr.Szabó"
+                  rows={2} value={rosterForm.ambulanceNotes}
+                  onChange={e => setRosterForm(f => ({ ...f, ambulanceNotes: e.target.value }))} />
+              </div>
+              <div className="space-y-1 col-span-2">
+                <Label className="text-xs">Szabadnap</Label>
+                <Input placeholder="Dr. Dede Kristóf, Dr. Silvas János" value={rosterForm.dayOff}
+                  onChange={e => setRosterForm(f => ({ ...f, dayOff: e.target.value }))} />
+              </div>
+              <div className="space-y-1 col-span-2">
+                <Label className="text-xs">Egyéb távollevők</Label>
+                <Input placeholder="dr.Fekete, dr.Kecskédi, dr.Bakó" value={rosterForm.absent}
+                  onChange={e => setRosterForm(f => ({ ...f, absent: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Műtétek kezdete</Label>
+                <Input placeholder="08:30" value={rosterForm.surgeryStartTime}
+                  onChange={e => setRosterForm(f => ({ ...f, surgeryStartTime: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRosterOpen(false)}>Mégse</Button>
+            <Button onClick={handleRosterSave} disabled={upsertRoster.isPending}>
+              {upsertRoster.isPending ? "Mentés..." : "Mentés"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Új műtét dialog */}
       <Dialog open={!!assign} onOpenChange={open => !open && setAssign(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -259,14 +422,12 @@ export default function SurgeryCalendar() {
                   <SelectContent>
                     {patients?.map(p => (
                       <SelectItem key={p.id} value={String(p.id)}>
-                        {p.lastName} {p.firstName}
-                        {p.diagnosis ? ` — ${p.diagnosis}` : ""}
+                        {p.lastName} {p.firstName}{p.diagnosis ? ` — ${p.diagnosis}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-1 col-span-2">
                 <Label className="text-xs">Sebész</Label>
                 <Select value={selSurgeon} onValueChange={setSelSurgeon}>
@@ -280,17 +441,14 @@ export default function SurgeryCalendar() {
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-1">
                 <Label className="text-xs">Időpont</Label>
                 <Input type="time" value={selTime} onChange={e => setSelTime(e.target.value)} data-testid="input-time" />
               </div>
-
               <div className="space-y-1">
                 <Label className="text-xs">Időtartam (perc)</Label>
                 <Input type="number" placeholder="pl. 90" value={selDuration} onChange={e => setSelDuration(e.target.value)} data-testid="input-duration" />
               </div>
-
               <div className="space-y-1 col-span-2">
                 <Label className="text-xs">Műtét típusa</Label>
                 <Input placeholder="pl. Appendectomia" value={selType} onChange={e => setSelType(e.target.value)} data-testid="input-type" />
@@ -299,11 +457,7 @@ export default function SurgeryCalendar() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssign(null)}>Mégse</Button>
-            <Button
-              onClick={handleCreate}
-              disabled={!selPatient || !selSurgeon || createSurgery.isPending}
-              data-testid="button-submit"
-            >
+            <Button onClick={handleCreate} disabled={!selPatient || !selSurgeon || createSurgery.isPending} data-testid="button-submit">
               {createSurgery.isPending ? "Mentés..." : "Előjegyez"}
             </Button>
           </DialogFooter>

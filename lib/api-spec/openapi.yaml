@@ -19,6 +19,8 @@ tags:
     description: Sebész műveletek
   - name: dashboard
     description: Dashboard összesítők
+  - name: daily-rosters
+    description: Napi beosztás
 
 paths:
   /healthz:
@@ -376,6 +378,52 @@ paths:
                 items:
                   $ref: "#/components/schemas/Surgery"
 
+  /daily-rosters/{date}:
+    get:
+      operationId: getDailyRoster
+      tags: [daily-rosters]
+      summary: Napi beosztás lekérdezése
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Napi beosztás
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyRoster"
+        "404":
+          description: Nincs beosztás erre a napra
+    put:
+      operationId: upsertDailyRoster
+      tags: [daily-rosters]
+      summary: Napi beosztás mentése (upsert)
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DailyRosterUpsert"
+      responses:
+        "200":
+          description: Mentett beosztás
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyRoster"
+
 components:
   schemas:
     HealthStatus:
@@ -649,6 +697,58 @@ components:
         status:
           type: string
           enum: [scheduled, in_progress, completed, cancelled, operated]
+
+    DailyRoster:
+      type: object
+      required: [id, date, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date
+        surgeryResponsible1:
+          type: ["string", "null"]
+        surgeryResponsible2:
+          type: ["string", "null"]
+        acuteResponsible1:
+          type: ["string", "null"]
+        acuteResponsible2:
+          type: ["string", "null"]
+        ambulanceNotes:
+          type: ["string", "null"]
+        dayOff:
+          type: ["string", "null"]
+        absent:
+          type: ["string", "null"]
+        surgeryStartTime:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DailyRosterUpsert:
+      type: object
+      properties:
+        surgeryResponsible1:
+          type: ["string", "null"]
+        surgeryResponsible2:
+          type: ["string", "null"]
+        acuteResponsible1:
+          type: ["string", "null"]
+        acuteResponsible2:
+          type: ["string", "null"]
+        ambulanceNotes:
+          type: ["string", "null"]
+        dayOff:
+          type: ["string", "null"]
+        absent:
+          type: ["string", "null"]
+        surgeryStartTime:
+          type: ["string", "null"]
 
     DashboardStats:
       type: object

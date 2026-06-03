@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DailyRoster,
+  DailyRosterUpsert,
   DashboardStats,
   GetAdmissionCalendarParams,
   GetCalendarSurgeriesParams,
@@ -1349,4 +1351,153 @@ export function useGetRecentActivity<TData = Awaited<ReturnType<typeof getRecent
 
 
 
+
+export const getGetDailyRosterUrl = (date: string,) => {
+
+
+
+
+  return `/api/daily-rosters/${date}`
+}
+
+/**
+ * @summary Napi beosztás lekérdezése
+ */
+export const getDailyRoster = async (date: string, options?: RequestInit): Promise<DailyRoster> => {
+
+  return customFetch<DailyRoster>(getGetDailyRosterUrl(date),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDailyRosterQueryKey = (date: string,) => {
+    return [
+    `/api/daily-rosters/${date}`
+    ] as const;
+    }
+
+
+export const getGetDailyRosterQueryOptions = <TData = Awaited<ReturnType<typeof getDailyRoster>>, TError = ErrorType<void>>(date: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDailyRoster>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDailyRosterQueryKey(date);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDailyRoster>>> = ({ signal }) => getDailyRoster(date, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(date), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDailyRoster>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDailyRosterQueryResult = NonNullable<Awaited<ReturnType<typeof getDailyRoster>>>
+export type GetDailyRosterQueryError = ErrorType<void>
+
+
+/**
+ * @summary Napi beosztás lekérdezése
+ */
+
+export function useGetDailyRoster<TData = Awaited<ReturnType<typeof getDailyRoster>>, TError = ErrorType<void>>(
+ date: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDailyRoster>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDailyRosterQueryOptions(date,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpsertDailyRosterUrl = (date: string,) => {
+
+
+
+
+  return `/api/daily-rosters/${date}`
+}
+
+/**
+ * @summary Napi beosztás mentése (upsert)
+ */
+export const upsertDailyRoster = async (date: string,
+    dailyRosterUpsert: DailyRosterUpsert, options?: RequestInit): Promise<DailyRoster> => {
+
+  return customFetch<DailyRoster>(getUpsertDailyRosterUrl(date),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      dailyRosterUpsert,)
+  }
+);}
+
+
+
+
+export const getUpsertDailyRosterMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertDailyRoster>>, TError,{date: string;data: BodyType<DailyRosterUpsert>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof upsertDailyRoster>>, TError,{date: string;data: BodyType<DailyRosterUpsert>}, TContext> => {
+
+const mutationKey = ['upsertDailyRoster'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upsertDailyRoster>>, {date: string;data: BodyType<DailyRosterUpsert>}> = (props) => {
+          const {date,data} = props ?? {};
+
+          return  upsertDailyRoster(date,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpsertDailyRosterMutationResult = NonNullable<Awaited<ReturnType<typeof upsertDailyRoster>>>
+    export type UpsertDailyRosterMutationBody = BodyType<DailyRosterUpsert>
+    export type UpsertDailyRosterMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Napi beosztás mentése (upsert)
+ */
+export const useUpsertDailyRoster = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertDailyRoster>>, TError,{date: string;data: BodyType<DailyRosterUpsert>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof upsertDailyRoster>>,
+        TError,
+        {date: string;data: BodyType<DailyRosterUpsert>},
+        TContext
+      > => {
+      return useMutation(getUpsertDailyRosterMutationOptions(options));
+    }
 

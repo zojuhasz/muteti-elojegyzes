@@ -252,6 +252,48 @@ export interface SurgeryUpdate {
   status?: SurgeryUpdateStatus;
 }
 
+export interface DailyRoster {
+  id: number;
+  date: string;
+  /** @nullable */
+  surgeryResponsible1?: string | null;
+  /** @nullable */
+  surgeryResponsible2?: string | null;
+  /** @nullable */
+  acuteResponsible1?: string | null;
+  /** @nullable */
+  acuteResponsible2?: string | null;
+  /** @nullable */
+  ambulanceNotes?: string | null;
+  /** @nullable */
+  dayOff?: string | null;
+  /** @nullable */
+  absent?: string | null;
+  /** @nullable */
+  surgeryStartTime?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DailyRosterUpsert {
+  /** @nullable */
+  surgeryResponsible1?: string | null;
+  /** @nullable */
+  surgeryResponsible2?: string | null;
+  /** @nullable */
+  acuteResponsible1?: string | null;
+  /** @nullable */
+  acuteResponsible2?: string | null;
+  /** @nullable */
+  ambulanceNotes?: string | null;
+  /** @nullable */
+  dayOff?: string | null;
+  /** @nullable */
+  absent?: string | null;
+  /** @nullable */
+  surgeryStartTime?: string | null;
+}
+
 export interface DashboardStats {
   totalPatients: number;
   waitingPatients: number;

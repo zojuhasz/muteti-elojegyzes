@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './dailyRoster';
+export * from './dailyRosterUpsert';
 export * from './dashboardStats';
 export * from './getAdmissionCalendarParams';
 export * from './getCalendarSurgeriesParams';
