@@ -267,30 +267,6 @@ export default function SurgeryCalendar() {
         </div>
       )}
 
-      {/* Sebész-jelmagyarázat */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-primary" />
-            Sebészek
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {surgeons?.filter(s => s.isActive && s.bgColor).map(s => {
-              const bg = s.bgColor!;
-              const text = s.textColor ?? autoTextColor(bg);
-              return (
-                <div key={s.id} className="text-[11px] rounded border px-2 py-0.5"
-                  style={{ backgroundColor: bg, color: text, borderColor: bg }}>
-                  Dr. {s.lastName}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Napi beosztás panel */}
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader className="pb-2 pt-3 px-4">
