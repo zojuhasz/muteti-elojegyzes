@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Pencil, FileDown } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -165,7 +165,7 @@ export default function SurgeryCalendar() {
   return (
     <div className="space-y-4">
       {/* Navigáció */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Button variant="outline" size="sm" onClick={() => setCurrentDay(d => subDays(d, 1))} data-testid="button-prev-day">
           <ChevronLeft className="w-4 h-4" />
         </Button>
@@ -180,6 +180,16 @@ export default function SurgeryCalendar() {
             Ma
           </Button>
         )}
+        <a
+          href={`/api/daily-rosters/${format(currentDay, "yyyy-MM-dd")}/pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="outline" size="sm" className="gap-1.5 ml-2">
+            <FileDown className="w-4 h-4" />
+            PDF
+          </Button>
+        </a>
       </div>
 
       {/* Műtőtermek */}
