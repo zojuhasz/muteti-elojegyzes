@@ -17,6 +17,7 @@ export const PatientStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;
 
 export interface Patient {
@@ -55,6 +56,7 @@ export const PatientInputStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;
 
 export interface PatientInput {
@@ -82,6 +84,7 @@ export const PatientUpdateStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;
 
 export interface PatientUpdate {
@@ -236,6 +239,7 @@ export const ListPatientsStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;
 
 export type ListSurgeriesParams = {

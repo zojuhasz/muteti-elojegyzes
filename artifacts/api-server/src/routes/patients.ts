@@ -17,7 +17,7 @@ const router: IRouter = Router();
 
 const ListPatientsQuery = z.object({
   search: z.string().optional(),
-  status: z.enum(["waiting", "scheduled", "operated", "cancelled"]).optional(),
+  status: z.enum(["waiting", "scheduled", "operated", "cancelled", "imported"]).optional(),
   patientType: z.string().optional(),
   admissionDate: z.string().optional(),
 });

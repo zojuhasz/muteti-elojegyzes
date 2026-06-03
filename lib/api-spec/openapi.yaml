@@ -49,7 +49,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [waiting, scheduled, operated, cancelled]
+            enum: [waiting, scheduled, operated, cancelled, imported]
         - name: patientType
           in: query
           schema:
@@ -409,7 +409,7 @@ components:
           type: ["string", "null"]
         status:
           type: string
-          enum: [waiting, scheduled, operated, cancelled]
+          enum: [waiting, scheduled, operated, cancelled, imported]
         patientType:
           type: ["string", "null"]
           description: "Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős"
@@ -446,7 +446,7 @@ components:
           type: string
         status:
           type: string
-          enum: [waiting, scheduled, operated, cancelled]
+          enum: [waiting, scheduled, operated, cancelled, imported]
         patientType:
           type: string
           description: "T, J, vagy S"
@@ -476,7 +476,7 @@ components:
           type: string
         status:
           type: string
-          enum: [waiting, scheduled, operated, cancelled]
+          enum: [waiting, scheduled, operated, cancelled, imported]
         patientType:
           type: string
         admissionDate:

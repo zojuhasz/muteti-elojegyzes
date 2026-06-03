@@ -14,4 +14,5 @@ export const PatientUpdateStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;

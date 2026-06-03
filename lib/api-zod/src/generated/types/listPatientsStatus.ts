@@ -14,4 +14,5 @@ export const ListPatientsStatus = {
   scheduled: 'scheduled',
   operated: 'operated',
   cancelled: 'cancelled',
+  imported: 'imported',
 } as const;
