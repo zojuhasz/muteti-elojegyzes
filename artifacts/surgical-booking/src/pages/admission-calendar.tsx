@@ -203,6 +203,9 @@ export default function AdmissionCalendar() {
                               {patient.diagnosis && (
                                 <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
                               )}
+                              {patient.surgeonName && (
+                                <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName.replace(/^Dr\.\s*/i, "Dr. ")}</div>
+                              )}
                             </div>
                           ) : (
                             <button

@@ -44,6 +44,11 @@ export interface Patient {
      * @nullable
      */
   admissionDate?: string | null;
+  /**
+     * Operáló orvos neve (szöveges)
+     * @nullable
+     */
+  surgeonName?: string | null;
   createdAt: string;
   updatedAt?: string;
 }

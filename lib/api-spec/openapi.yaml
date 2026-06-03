@@ -416,6 +416,9 @@ components:
         admissionDate:
           type: ["string", "null"]
           description: "Tervezett felvételi dátum (YYYY-MM-DD)"
+        surgeonName:
+          type: ["string", "null"]
+          description: "Operáló orvos neve (szöveges)"
         createdAt:
           type: string
           format: date-time
