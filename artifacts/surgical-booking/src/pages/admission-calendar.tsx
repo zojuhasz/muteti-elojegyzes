@@ -26,7 +26,7 @@ const TYPE_FILLED: Record<string, string> = {
 
 const TYPE_LABEL: Record<string, string> = {
   Tu: "Tumoros",
-  J: "Járóbeteg",
+  J: "Jóindulatú",
   S: "Sürgős",
 };
 
