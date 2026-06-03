@@ -14,19 +14,37 @@ import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
-const statusColors: Record<string, string> = {
-  scheduled: "bg-primary/15 text-primary border-primary/30",
-  in_progress: "bg-orange-100 text-orange-700 border-orange-200",
-  completed: "bg-green-100 text-green-700 border-green-200",
-  cancelled: "bg-red-100 text-red-600 border-red-200",
-};
-
 const statusLabels: Record<string, string> = {
   scheduled: "Tervezett",
   in_progress: "Folyamatban",
   completed: "Elvégezve",
   cancelled: "Törölve",
+  operated: "Elvégzett",
 };
+
+function autoTextColor(hex: string): string {
+  const c = hex.replace(/^#/, "").trim();
+  let r: number, g: number, b: number;
+  if (c.length === 3) {
+    r = parseInt(c[0] + c[0], 16);
+    g = parseInt(c[1] + c[1], 16);
+    b = parseInt(c[2] + c[2], 16);
+  } else if (c.length === 6) {
+    r = parseInt(c.slice(0, 2), 16);
+    g = parseInt(c.slice(2, 4), 16);
+    b = parseInt(c.slice(4, 6), 16);
+  } else {
+    return "#000000";
+  }
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? "#000000" : "#ffffff";
+}
+
+function assistants(p: { assistant1?: string | null; assistant2?: string | null; assistant3?: string | null } | undefined): string[] {
+  if (!p) return [];
+  return [p.assistant1, p.assistant2, p.assistant3]
+    .filter((a): a is string => !!a && a.trim() !== "" && a.trim() !== "-");
+}
 
 type AssignState = { date: string; roomId: number; roomName: string } | null;
 
@@ -160,26 +178,48 @@ export default function SurgeryCalendar() {
                       onClick={() => openAssign(dayStr, room.id, `${room.code} — ${room.name}`)}
                       data-testid={`cell-${room.code}-${dayStr}`}
                     >
-                      {items.map(s => (
-                        <div
-                          key={s.id}
-                          className={`text-[10px] rounded border px-1.5 py-1 leading-tight ${statusColors[s.status] ?? "bg-muted"} group/item relative`}
-                          data-testid={`cal-surgery-${s.id}`}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <div className="font-semibold">{format(new Date(s.scheduledDate), "HH:mm")}</div>
-                          <div className="font-medium truncate">{s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}</div>
-                          {s.surgeryType && <div className="truncate opacity-75">{s.surgeryType}</div>}
-                          {s.surgeon && <div className="truncate opacity-60">Dr. {s.surgeon.lastName}</div>}
-                          <button
-                            className="absolute top-0.5 right-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                            onClick={e => handleDelete(s.id, e)}
-                            data-testid={`button-delete-${s.id}`}
+                      {items.map(s => {
+                        const bg = s.surgeon?.bgColor ?? null;
+                        const text = bg
+                          ? (s.surgeon?.textColor ?? autoTextColor(bg))
+                          : null;
+                        const cellStyle = bg
+                          ? { backgroundColor: bg, color: text ?? undefined, borderColor: bg }
+                          : undefined;
+                        const cellClass = bg
+                          ? "text-[10px] rounded border px-1.5 py-1 leading-tight group/item relative"
+                          : `text-[10px] rounded border px-1.5 py-1 leading-tight bg-muted group/item relative`;
+                        const assz = assistants(s.patient ?? undefined);
+                        return (
+                          <div
+                            key={s.id}
+                            className={cellClass}
+                            style={cellStyle}
+                            data-testid={`cal-surgery-${s.id}`}
+                            onClick={e => e.stopPropagation()}
                           >
-                            <Trash2 className="w-2.5 h-2.5 text-red-500" />
-                          </button>
-                        </div>
-                      ))}
+                            <div className="font-semibold">{format(new Date(s.scheduledDate), "HH:mm")}</div>
+                            <div className="font-medium truncate">{s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}</div>
+                            {s.patient?.diagnosis && <div className="truncate" style={{ opacity: 0.8 }}>{s.patient.diagnosis}</div>}
+                            {s.surgeryType && <div className="truncate" style={{ opacity: 0.75 }}>{s.surgeryType}</div>}
+                            {s.surgeon && <div className="truncate italic" style={{ opacity: 0.65 }}>Dr. {s.surgeon.lastName}</div>}
+                            {assz.length > 0 && (
+                              <div className="truncate" style={{ opacity: 0.6 }}>
+                                {assz.map((a, i) => (
+                                  <span key={i}>{i > 0 ? ", " : ""}{a.replace(/^Dr\.\s*/i, "")}</span>
+                                ))}
+                              </div>
+                            )}
+                            <button
+                              className="absolute top-0.5 right-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                              onClick={e => handleDelete(s.id, e)}
+                              data-testid={`button-delete-${s.id}`}
+                            >
+                              <Trash2 className="w-2.5 h-2.5 text-red-500" />
+                            </button>
+                          </div>
+                        );
+                      })}
                       <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Plus className="w-3 h-3 text-muted-foreground" />
                       </div>
@@ -196,14 +236,24 @@ export default function SurgeryCalendar() {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            Jelmagyarázat
+            Sebészek
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(statusLabels).map(([key, label]) => (
-              <div key={key} className={`text-xs rounded border px-2 py-1 ${statusColors[key]}`}>{label}</div>
-            ))}
+          <div className="flex flex-wrap gap-2">
+            {surgeons?.filter(s => s.isActive && s.bgColor).map(s => {
+              const bg = s.bgColor!;
+              const text = s.textColor ?? autoTextColor(bg);
+              return (
+                <div
+                  key={s.id}
+                  className="text-[11px] rounded border px-2 py-0.5"
+                  style={{ backgroundColor: bg, color: text, borderColor: bg }}
+                >
+                  Dr. {s.lastName}
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

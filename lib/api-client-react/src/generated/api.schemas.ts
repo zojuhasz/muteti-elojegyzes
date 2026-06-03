@@ -54,6 +54,21 @@ export interface Patient {
      * @nullable
      */
   surgeonName?: string | null;
+  /**
+     * 1. asszisztens neve
+     * @nullable
+     */
+  assistant1?: string | null;
+  /**
+     * 2. asszisztens neve
+     * @nullable
+     */
+  assistant2?: string | null;
+  /**
+     * 3. asszisztens neve
+     * @nullable
+     */
+  assistant3?: string | null;
   createdAt: string;
   updatedAt?: string;
 }

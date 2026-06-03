@@ -422,6 +422,15 @@ components:
         surgeonName:
           type: ["string", "null"]
           description: "Operáló orvos neve (szöveges)"
+        assistant1:
+          type: ["string", "null"]
+          description: "1. asszisztens neve"
+        assistant2:
+          type: ["string", "null"]
+          description: "2. asszisztens neve"
+        assistant3:
+          type: ["string", "null"]
+          description: "3. asszisztens neve"
         createdAt:
           type: string
           format: date-time

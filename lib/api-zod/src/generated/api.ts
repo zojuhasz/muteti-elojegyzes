@@ -41,6 +41,9 @@ export const ListPatientsResponseItem = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -89,6 +92,9 @@ export const GetPatientResponse = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -132,6 +138,9 @@ export const UpdatePatientResponse = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -209,6 +218,9 @@ export const ListSurgeriesResponseItem = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
@@ -281,6 +293,9 @@ export const GetSurgeryResponse = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
@@ -348,6 +363,9 @@ export const UpdateSurgeryResponse = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
@@ -427,6 +445,9 @@ export const GetCalendarSurgeriesResponseItem = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
@@ -475,6 +496,9 @@ export const GetAdmissionCalendarResponseItem = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 })
@@ -508,6 +532,9 @@ export const GetRecentActivityResponseItem = zod.object({
   "patientType": zod.string().nullish().describe('Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős'),
   "admissionDate": zod.string().nullish().describe('Tervezett felvételi dátum (YYYY-MM-DD)'),
   "surgeonName": zod.string().nullish().describe('Operáló orvos neve (szöveges)'),
+  "assistant1": zod.string().nullish().describe('1. asszisztens neve'),
+  "assistant2": zod.string().nullish().describe('2. asszisztens neve'),
+  "assistant3": zod.string().nullish().describe('3. asszisztens neve'),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date().optional()
 }).optional(),
