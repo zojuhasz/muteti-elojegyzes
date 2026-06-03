@@ -10,17 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar } from "lucide-react";
-import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-
-const statusLabels: Record<string, string> = {
-  scheduled: "Tervezett",
-  in_progress: "Folyamatban",
-  completed: "Elvégezve",
-  cancelled: "Törölve",
-  operated: "Elvégzett",
-};
 
 function autoTextColor(hex: string): string {
   const c = hex.replace(/^#/, "").trim();
@@ -49,7 +41,7 @@ function assistants(p: { assistant1?: string | null; assistant2?: string | null;
 type AssignState = { date: string; roomId: number; roomName: string } | null;
 
 export default function SurgeryCalendar() {
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [currentDay, setCurrentDay] = useState(() => new Date());
   const [assign, setAssign] = useState<AssignState>(null);
   const [selPatient, setSelPatient] = useState("");
   const [selSurgeon, setSelSurgeon] = useState("");
@@ -59,29 +51,25 @@ export default function SurgeryCalendar() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const from = format(weekStart, "yyyy-MM-dd");
-  const to = format(addDays(weekStart, 6), "yyyy-MM-dd");
+  const dayStr = format(currentDay, "yyyy-MM-dd");
 
-  const { data: surgeries, isLoading } = useGetCalendarSurgeries({ from, to });
+  const { data: surgeries, isLoading } = useGetCalendarSurgeries({ from: dayStr, to: dayStr });
   const { data: rooms } = useListOperatingRooms();
   const { data: patients } = useListPatients();
   const { data: surgeons } = useListSurgeons();
   const createSurgery = useCreateSurgery();
   const deleteSurgery = useDeleteSurgery();
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const activeRooms = rooms?.filter(r => r.isActive) ?? [];
 
-  function surgeriesFor(roomId: number, day: Date) {
-    const dayStr = format(day, "yyyy-MM-dd");
-    return surgeries?.filter(s => {
-      const sDay = format(new Date(s.scheduledDate), "yyyy-MM-dd");
-      return s.operatingRoomId === roomId && sDay === dayStr;
-    }) ?? [];
+  function surgeriesForRoom(roomId: number) {
+    return (surgeries ?? [])
+      .filter(s => s.operatingRoomId === roomId)
+      .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
   }
 
-  function openAssign(date: string, roomId: number, roomName: string) {
-    setAssign({ date, roomId, roomName });
+  function openAssign(roomId: number, roomName: string) {
+    setAssign({ date: dayStr, roomId, roomName });
     setSelPatient("");
     setSelSurgeon("");
     setSelTime("08:00");
@@ -104,7 +92,7 @@ export default function SurgeryCalendar() {
       },
     }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from, to }) });
+        queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from: dayStr, to: dayStr }) });
         toast({ title: "Műtét előjegyezve" });
         setAssign(null);
       },
@@ -119,116 +107,112 @@ export default function SurgeryCalendar() {
     if (!confirm("Törli ezt az előjegyzést?")) return;
     deleteSurgery.mutate({ id }, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from, to }) });
+        queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from: dayStr, to: dayStr }) });
         toast({ title: "Előjegyzés törölve" });
       },
     });
   }
 
+  const isToday = dayStr === format(new Date(), "yyyy-MM-dd");
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" onClick={() => setWeekStart(w => subWeeks(w, 1))} data-testid="button-prev-week">
+        <Button variant="outline" size="sm" onClick={() => setCurrentDay(d => subDays(d, 1))} data-testid="button-prev-day">
           <ChevronLeft className="w-4 h-4" />
         </Button>
-        <span className="font-medium text-sm min-w-60 text-center">
-          {format(weekStart, "yyyy. MMMM d.", { locale: hu })} – {format(addDays(weekStart, 6), "MMMM d.", { locale: hu })}
+        <span className="font-medium text-sm min-w-48 text-center capitalize">
+          {format(currentDay, "yyyy. MMMM d., EEEE", { locale: hu })}
         </span>
-        <Button variant="outline" size="sm" onClick={() => setWeekStart(w => addWeeks(w, 1))} data-testid="button-next-week">
+        <Button variant="outline" size="sm" onClick={() => setCurrentDay(d => addDays(d, 1))} data-testid="button-next-day">
           <ChevronRight className="w-4 h-4" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} data-testid="button-today">
-          Ma
-        </Button>
-        <span className="text-xs text-muted-foreground ml-2">Kattintson egy cellára az előjegyzéshez</span>
+        {!isToday && (
+          <Button variant="ghost" size="sm" onClick={() => setCurrentDay(new Date())} data-testid="button-today">
+            Ma
+          </Button>
+        )}
+        <span className="text-xs text-muted-foreground ml-2">Kattintson egy műtőteremre az előjegyzéshez</span>
       </div>
 
       {isLoading ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : (
-        <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
-            <div className="grid gap-px bg-border rounded-t-lg overflow-hidden" style={{ gridTemplateColumns: `120px repeat(7, 1fr)` }}>
-              <div className="bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground">Műtőterem</div>
-              {days.map(day => {
-                const isToday = format(day, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd");
-                return (
-                  <div key={day.toISOString()} className={`px-3 py-2 text-xs font-medium text-center ${isToday ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground"}`}>
-                    {format(day, "EEE", { locale: hu })}
-                    <br />
-                    <span className="font-bold">{format(day, "MM. d.")}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {activeRooms.map(room => (
-              <div key={room.id} className="grid gap-px bg-border" style={{ gridTemplateColumns: `120px repeat(7, 1fr)` }} data-testid={`calendar-row-${room.id}`}>
-                <div className="bg-card px-3 py-3 flex items-center gap-2">
-                  <span className="text-sm font-bold text-primary">{room.code}</span>
-                  <span className="text-xs text-muted-foreground">{room.name}</span>
-                </div>
-                {days.map(day => {
-                  const dayStr = format(day, "yyyy-MM-dd");
-                  const items = surgeriesFor(room.id, day);
-                  return (
-                    <div
-                      key={day.toISOString()}
-                      className="bg-card px-1 py-1 min-h-[88px] space-y-1 group cursor-pointer hover:bg-muted/20 transition-colors relative"
-                      onClick={() => openAssign(dayStr, room.id, `${room.code} — ${room.name}`)}
-                      data-testid={`cell-${room.code}-${dayStr}`}
-                    >
-                      {items.map(s => {
-                        const bg = s.surgeon?.bgColor ?? null;
-                        const text = bg
-                          ? (s.surgeon?.textColor ?? autoTextColor(bg))
-                          : null;
-                        const cellStyle = bg
-                          ? { backgroundColor: bg, color: text ?? undefined, borderColor: bg }
-                          : undefined;
-                        const cellClass = bg
-                          ? "text-[10px] rounded border px-1.5 py-1 leading-tight group/item relative"
-                          : `text-[10px] rounded border px-1.5 py-1 leading-tight bg-muted group/item relative`;
-                        const assz = assistants(s.patient ?? undefined);
-                        return (
-                          <div
-                            key={s.id}
-                            className={cellClass}
-                            style={cellStyle}
-                            data-testid={`cal-surgery-${s.id}`}
-                            onClick={e => e.stopPropagation()}
-                          >
-                            <div className="font-semibold">{format(new Date(s.scheduledDate), "HH:mm")}</div>
-                            <div className="font-medium truncate">{s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}</div>
-                            {s.patient?.diagnosis && <div className="truncate" style={{ opacity: 0.8 }}>{s.patient.diagnosis}</div>}
-                            {s.surgeryType && <div className="truncate" style={{ opacity: 0.75 }}>{s.surgeryType}</div>}
-                            {s.surgeon && <div className="truncate italic" style={{ opacity: 0.65 }}>Dr. {s.surgeon.lastName}</div>}
-                            {assz.length > 0 && (
-                              <div className="truncate" style={{ opacity: 0.6 }}>
-                                {assz.map((a, i) => (
-                                  <span key={i}>{i > 0 ? ", " : ""}{a.replace(/^Dr\.\s*/i, "")}</span>
-                                ))}
-                              </div>
-                            )}
-                            <button
-                              className="absolute top-0.5 right-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                              onClick={e => handleDelete(s.id, e)}
-                              data-testid={`button-delete-${s.id}`}
-                            >
-                              <Trash2 className="w-2.5 h-2.5 text-red-500" />
-                            </button>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {activeRooms.map(room => {
+            const items = surgeriesForRoom(room.id);
+            return (
+              <Card
+                key={room.id}
+                className="cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all"
+                onClick={() => openAssign(room.id, `${room.code} — ${room.name}`)}
+                data-testid={`room-card-${room.id}`}
+              >
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <span className="text-primary font-bold">{room.code}</span>
+                    <span className="text-muted-foreground font-normal">{room.name}</span>
+                    <Badge variant="outline" className="ml-auto text-[10px] px-1.5 py-0">{items.length} műtét</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-3 space-y-1.5">
+                  {items.length === 0 ? (
+                    <div className="text-xs text-muted-foreground italic py-3 text-center">Nincs bejegyzés</div>
+                  ) : (
+                    items.map(s => {
+                      const bg = s.surgeon?.bgColor ?? null;
+                      const text = bg ? (s.surgeon?.textColor ?? autoTextColor(bg)) : null;
+                      const assz = assistants(s.patient ?? undefined);
+                      return (
+                        <div
+                          key={s.id}
+                          className="text-[11px] rounded border px-2 py-1.5 leading-snug group/item relative"
+                          style={bg ? { backgroundColor: bg, color: text ?? undefined, borderColor: bg } : undefined}
+                          onClick={e => e.stopPropagation()}
+                          data-testid={`cal-surgery-${s.id}`}
+                        >
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-[12px]">{format(new Date(s.scheduledDate), "HH:mm")}</span>
+                            <span className="font-semibold truncate">
+                              {s.patient ? `${s.patient.lastName} ${s.patient.firstName}` : "—"}
+                            </span>
                           </div>
-                        );
-                      })}
-                      <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Plus className="w-3 h-3 text-muted-foreground" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+                          {s.patient?.diagnosis && (
+                            <div className="truncate" style={{ opacity: 0.8 }}>{s.patient.diagnosis}</div>
+                          )}
+                          {s.surgeryType && (
+                            <div className="truncate" style={{ opacity: 0.75 }}>{s.surgeryType}</div>
+                          )}
+                          <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                            {s.surgeon && (
+                              <span className="italic" style={{ opacity: 0.7 }}>Dr. {s.surgeon.lastName}</span>
+                            )}
+                            {assz.length > 0 && (
+                              <span style={{ opacity: 0.6 }}>
+                                — {assz.map(a => a.replace(/^Dr\.\s*/i, "")).join(", ")}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            className="absolute top-1 right-1 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            onClick={e => handleDelete(s.id, e)}
+                            data-testid={`button-delete-${s.id}`}
+                          >
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div className="pt-1 flex justify-end">
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                      <Plus className="w-3 h-3" /> Előjegyez
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
