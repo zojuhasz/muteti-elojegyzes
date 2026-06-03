@@ -143,7 +143,10 @@ export default function AdmissionCalendar() {
               })}
             </div>
 
-            {DAILY_SLOTS.map((type, slotIdx) => (
+            {DAILY_SLOTS.map((type, slotIdx) => {
+              const typeNum = DAILY_SLOTS.slice(0, slotIdx + 1).filter(t => t === type).length;
+              const slotLabel = `${type}${typeNum}`;
+              return (
               <div
                 key={slotIdx}
                 className="grid gap-px bg-border"
@@ -151,7 +154,7 @@ export default function AdmissionCalendar() {
               >
                 <div className="bg-card flex items-center justify-center py-2">
                   <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${TYPE_FILLED[type]}`}>
-                    {type}
+                    {slotLabel}
                   </span>
                 </div>
                 {weekdays.map(day => {
@@ -183,7 +186,8 @@ export default function AdmissionCalendar() {
                   );
                 })}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
