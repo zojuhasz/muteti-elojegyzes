@@ -37,12 +37,13 @@ type SlotClick = { date: string; type: string; slotIndex: number };
 type FormState = {
   lastName: string;
   firstName: string;
+  birthDate: string;
   taj: string;
   diagnosis: string;
   notes: string;
 };
 
-const EMPTY_FORM: FormState = { lastName: "", firstName: "", taj: "", diagnosis: "", notes: "" };
+const EMPTY_FORM: FormState = { lastName: "", firstName: "", birthDate: "", taj: "", diagnosis: "", notes: "" };
 
 export default function AdmissionCalendar() {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -74,11 +75,12 @@ export default function AdmissionCalendar() {
   }
 
   function handleSubmit() {
-    if (!slot || !form.lastName.trim() || !form.firstName.trim()) return;
+    if (!slot || !form.lastName.trim() || !form.firstName.trim() || !form.birthDate) return;
     createPatient.mutate({
       data: {
         lastName: form.lastName.trim(),
         firstName: form.firstName.trim(),
+        birthDate: new Date(form.birthDate) as never,
         taj: form.taj.trim() || undefined,
         diagnosis: form.diagnosis.trim() || undefined,
         notes: form.notes.trim() || undefined,
@@ -215,7 +217,7 @@ export default function AdmissionCalendar() {
             </DialogTitle>
             {slot && (
               <p className="text-sm text-muted-foreground">
-                {slot.date} &nbsp;·&nbsp; {slot.slotIdx + 1}. időpont
+                {slot.date} &nbsp;·&nbsp; {slot.slotIndex + 1}. időpont
               </p>
             )}
           </DialogHeader>
@@ -239,6 +241,15 @@ export default function AdmissionCalendar() {
                   onChange={e => handleField("firstName", e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs">Születési dátum <span className="text-destructive">*</span></Label>
+              <Input
+                type="date"
+                value={form.birthDate}
+                onChange={e => handleField("birthDate", e.target.value)}
+              />
             </div>
 
             <div className="space-y-1">
@@ -275,7 +286,7 @@ export default function AdmissionCalendar() {
             <Button variant="outline" onClick={() => setSlot(null)}>Mégse</Button>
             <Button
               onClick={handleSubmit}
-              disabled={!form.lastName.trim() || !form.firstName.trim() || createPatient.isPending}
+              disabled={!form.lastName.trim() || !form.firstName.trim() || !form.birthDate || createPatient.isPending}
             >
               {createPatient.isPending ? "Mentés..." : "Beteg felvétele"}
             </Button>
