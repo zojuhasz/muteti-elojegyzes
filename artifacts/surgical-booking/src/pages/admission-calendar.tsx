@@ -184,51 +184,43 @@ export default function AdmissionCalendar() {
               })}
             </div>
 
-            {/* Sorok — egy sor = egy slot-pozíció */}
-            {ALL_SLOTS.map(slotName => {
-              const group = slotGroup(slotName);
-              return (
-                <div
-                  key={slotName}
-                  className="grid gap-px bg-border"
-                  style={{ gridTemplateColumns: `repeat(${weekdays.length}, 1fr)` }}
-                >
-                  {weekdays.map(day => {
-                    const dayStr = format(day, "yyyy-MM-dd");
-                    const isActive = slotsForDay(day).includes(slotName);
-
-                    if (!isActive) {
-                      return <div key={dayStr} className="h-0 overflow-hidden" />;
-                    }
-
-                    const patient = patientForSlot(slotName, day);
-
-                    return (
-                      <div key={dayStr} className="bg-card px-1 py-1 min-h-[60px]">
-                        {patient ? (
-                          <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${GROUP_FILLED[group]}`}>
-                            <div className="text-[10px] font-bold mb-0.5 opacity-60">{slotName}</div>
-                            <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
-                            {patient.diagnosis && (
-                              <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
-                            )}
-                          </div>
-                        ) : (
-                          <button
-                            className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex flex-col items-center justify-center gap-0.5 ${GROUP_COLORS[group]}`}
-                            onClick={() => openSlot(dayStr, slotName)}
-                            title={`${slotName} — ${dayStr}`}
-                          >
-                            <span className="font-bold opacity-80">{slotName}</span>
-                            <span className="opacity-50 text-[10px]">Felvesz</span>
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
+            {/* Oszlopok — minden nap csak a saját aktív slotjait mutatja */}
+            <div className="flex gap-px bg-border">
+              {weekdays.map(day => {
+                const dayStr = format(day, "yyyy-MM-dd");
+                const daySlots = slotsForDay(day);
+                return (
+                  <div key={dayStr} className="flex-1 flex flex-col gap-px bg-border">
+                    {daySlots.map(slotName => {
+                      const group = slotGroup(slotName);
+                      const patient = patientForSlot(slotName, day);
+                      return (
+                        <div key={slotName} className="bg-card px-1 py-1 min-h-[60px]">
+                          {patient ? (
+                            <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${GROUP_FILLED[group]}`}>
+                              <div className="text-[10px] font-bold mb-0.5 opacity-60">{slotName}</div>
+                              <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
+                              {patient.diagnosis && (
+                                <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex flex-col items-center justify-center gap-0.5 ${GROUP_COLORS[group]}`}
+                              onClick={() => openSlot(dayStr, slotName)}
+                              title={`${slotName} — ${dayStr}`}
+                            >
+                              <span className="font-bold opacity-80">{slotName}</span>
+                              <span className="opacity-50 text-[10px]">Felvesz</span>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
