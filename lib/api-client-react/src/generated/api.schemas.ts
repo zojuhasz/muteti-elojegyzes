@@ -170,6 +170,7 @@ export const SurgeryStatus = {
   in_progress: 'in_progress',
   completed: 'completed',
   cancelled: 'cancelled',
+  operated: 'operated',
 } as const;
 
 export interface Surgery {
@@ -200,6 +201,7 @@ export const SurgeryInputStatus = {
   in_progress: 'in_progress',
   completed: 'completed',
   cancelled: 'cancelled',
+  operated: 'operated',
 } as const;
 
 export interface SurgeryInput {
@@ -221,6 +223,7 @@ export const SurgeryUpdateStatus = {
   in_progress: 'in_progress',
   completed: 'completed',
   cancelled: 'cancelled',
+  operated: 'operated',
 } as const;
 
 export interface SurgeryUpdate {
@@ -278,6 +281,7 @@ export const ListSurgeriesStatus = {
   in_progress: 'in_progress',
   completed: 'completed',
   cancelled: 'cancelled',
+  operated: 'operated',
 } as const;
 
 export type GetCalendarSurgeriesParams = {

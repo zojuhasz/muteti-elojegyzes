@@ -182,7 +182,7 @@ export const ListSurgeriesQueryParams = zod.object({
   "operatingRoomId": zod.coerce.number().optional(),
   "surgeonId": zod.coerce.number().optional(),
   "patientId": zod.coerce.number().optional(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional()
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']).optional()
 })
 
 export const ListSurgeriesResponseItem = zod.object({
@@ -194,7 +194,7 @@ export const ListSurgeriesResponseItem = zod.object({
   "estimatedDurationMinutes": zod.number().nullish(),
   "surgeryType": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']),
   "patient": zod.object({
   "id": zod.number(),
   "lastName": zod.string(),
@@ -246,7 +246,7 @@ export const CreateSurgeryBody = zod.object({
   "estimatedDurationMinutes": zod.number().optional(),
   "surgeryType": zod.string().optional(),
   "notes": zod.string().optional(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional()
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']).optional()
 })
 
 
@@ -266,7 +266,7 @@ export const GetSurgeryResponse = zod.object({
   "estimatedDurationMinutes": zod.number().nullish(),
   "surgeryType": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']),
   "patient": zod.object({
   "id": zod.number(),
   "lastName": zod.string(),
@@ -321,7 +321,7 @@ export const UpdateSurgeryBody = zod.object({
   "estimatedDurationMinutes": zod.number().optional(),
   "surgeryType": zod.string().optional(),
   "notes": zod.string().optional(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']).optional()
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']).optional()
 })
 
 export const UpdateSurgeryResponse = zod.object({
@@ -333,7 +333,7 @@ export const UpdateSurgeryResponse = zod.object({
   "estimatedDurationMinutes": zod.number().nullish(),
   "surgeryType": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']),
   "patient": zod.object({
   "id": zod.number(),
   "lastName": zod.string(),
@@ -412,7 +412,7 @@ export const GetCalendarSurgeriesResponseItem = zod.object({
   "estimatedDurationMinutes": zod.number().nullish(),
   "surgeryType": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']),
   "patient": zod.object({
   "id": zod.number(),
   "lastName": zod.string(),
@@ -493,7 +493,7 @@ export const GetRecentActivityResponseItem = zod.object({
   "estimatedDurationMinutes": zod.number().nullish(),
   "surgeryType": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled']),
+  "status": zod.enum(['scheduled', 'in_progress', 'completed', 'cancelled', 'operated']),
   "patient": zod.object({
   "id": zod.number(),
   "lastName": zod.string(),

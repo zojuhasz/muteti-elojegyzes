@@ -203,7 +203,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [scheduled, in_progress, completed, cancelled]
+            enum: [scheduled, in_progress, completed, cancelled, operated]
       responses:
         "200":
           description: Műtétek listája
@@ -582,7 +582,7 @@ components:
           type: ["string", "null"]
         status:
           type: string
-          enum: [scheduled, in_progress, completed, cancelled]
+          enum: [scheduled, in_progress, completed, cancelled, operated]
         patient:
           $ref: "#/components/schemas/Patient"
         operatingRoom:
@@ -617,7 +617,7 @@ components:
           type: string
         status:
           type: string
-          enum: [scheduled, in_progress, completed, cancelled]
+          enum: [scheduled, in_progress, completed, cancelled, operated]
 
     SurgeryUpdate:
       type: object
@@ -639,7 +639,7 @@ components:
           type: string
         status:
           type: string
-          enum: [scheduled, in_progress, completed, cancelled]
+          enum: [scheduled, in_progress, completed, cancelled, operated]
 
     DashboardStats:
       type: object

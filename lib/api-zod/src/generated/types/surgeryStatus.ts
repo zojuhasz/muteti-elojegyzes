@@ -14,4 +14,5 @@ export const SurgeryStatus = {
   in_progress: 'in_progress',
   completed: 'completed',
   cancelled: 'cancelled',
+  operated: 'operated',
 } as const;
