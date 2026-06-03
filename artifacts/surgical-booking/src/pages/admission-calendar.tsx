@@ -238,6 +238,9 @@ export default function AdmissionCalendar() {
                                 {patient.diagnosis && (
                                   <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.diagnosis}</div>
                                 )}
+                                {patient.surgery && (
+                                  <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.surgery}</div>
+                                )}
                                 {patient.surgeonName && (
                                   <div className="text-[10px] truncate mt-0.5 italic" style={{ opacity: 0.75 }}>{patient.surgeonName}</div>
                                 )}
@@ -248,6 +251,9 @@ export default function AdmissionCalendar() {
                                 <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
                                 {patient.diagnosis && (
                                   <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
+                                )}
+                                {patient.surgery && (
+                                  <div className="text-[10px] opacity-70 truncate">{patient.surgery}</div>
                                 )}
                                 {patient.surgeonName && (
                                   <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName}</div>

@@ -407,6 +407,9 @@ components:
           type: ["string", "null"]
         diagnosis:
           type: ["string", "null"]
+        surgery:
+          type: ["string", "null"]
+          description: "Műtét neve / típusa"
         status:
           type: string
           enum: [waiting, scheduled, operated, cancelled, imported]

@@ -33,6 +33,11 @@ export interface Patient {
   notes?: string | null;
   /** @nullable */
   diagnosis?: string | null;
+  /**
+     * Műtét neve / típusa
+     * @nullable
+     */
+  surgery?: string | null;
   status: PatientStatus;
   /**
      * Beteg típusa: T=Tervezett, J=Járóbeteg, S=Sürgős
