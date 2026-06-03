@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useGetAdmissionCalendar, useCreatePatient, getGetAdmissionCalendarQueryKey } from "@workspace/api-client-react";
+import { useState, useMemo } from "react";
+import { useGetAdmissionCalendar, useCreatePatient, getGetAdmissionCalendarQueryKey, useListSurgeons } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +11,23 @@ import { ChevronLeft, ChevronRight, UserPlus } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isWeekend } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+
+// Hex szín kontrasztszínének meghatározása (sötét vagy világos szöveg)
+function autoTextColor(hex: string): string {
+  const c = hex.replace(/^#/, "").trim();
+  let r: number, g: number, b: number;
+  if (c.length === 3) {
+    r = parseInt(c[0] + c[0], 16);
+    g = parseInt(c[1] + c[1], 16);
+    b = parseInt(c[2] + c[2], 16);
+  } else {
+    r = parseInt(c.slice(0, 2), 16);
+    g = parseInt(c.slice(2, 4), 16);
+    b = parseInt(c.slice(4, 6), 16);
+  }
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.55 ? "#1a1a1a" : "#ffffff";
+}
 
 // Slot névből csoport prefix kinyerése
 function slotGroup(slot: string): string {
@@ -94,7 +111,20 @@ export default function AdmissionCalendar() {
   const to = format(addDays(weekStart, 6), "yyyy-MM-dd");
 
   const { data: patients, isLoading } = useGetAdmissionCalendar({ from, to });
+  const { data: surgeons } = useListSurgeons();
   const createPatient = useCreatePatient();
+
+  const surgeonColorMap = useMemo(() => {
+    const map = new Map<string, { bg: string; text: string }>();
+    surgeons?.forEach(s => {
+      if (!s.bgColor) return;
+      const textFallback = s.textColor ?? autoTextColor(s.bgColor);
+      const key = `Dr. ${s.lastName} ${s.firstName}`;
+      map.set(key, { bg: s.bgColor, text: textFallback });
+      map.set(`${s.lastName} ${s.firstName}`, { bg: s.bgColor, text: textFallback });
+    });
+    return map;
+  }, [surgeons]);
 
   const weekdays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).filter(d => !isWeekend(d));
 
@@ -196,18 +226,35 @@ export default function AdmissionCalendar() {
                       const patient = patientForSlot(slotName, day);
                       return (
                         <div key={slotName} className="bg-card px-1 py-1 min-h-[60px]">
-                          {patient ? (
-                            <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${GROUP_FILLED[group]}`}>
-                              <div className="text-[10px] font-bold mb-0.5 opacity-60">{slotName}</div>
-                              <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
-                              {patient.diagnosis && (
-                                <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
-                              )}
-                              {patient.surgeonName && (
-                                <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName.replace(/^Dr\.\s*/i, "Dr. ")}</div>
-                              )}
-                            </div>
-                          ) : (
+                          {patient ? (() => {
+                            const colors = patient.surgeonName ? surgeonColorMap.get(patient.surgeonName) : undefined;
+                            return colors ? (
+                              <div
+                                className="h-full rounded border px-2 py-1.5 text-xs leading-snug"
+                                style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.bg }}
+                              >
+                                <div className="text-[10px] font-bold mb-0.5" style={{ opacity: 0.7 }}>{slotName}</div>
+                                <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
+                                {patient.diagnosis && (
+                                  <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.diagnosis}</div>
+                                )}
+                                {patient.surgeonName && (
+                                  <div className="text-[10px] truncate mt-0.5 italic" style={{ opacity: 0.75 }}>{patient.surgeonName}</div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${GROUP_FILLED[group]}`}>
+                                <div className="text-[10px] font-bold mb-0.5 opacity-60">{slotName}</div>
+                                <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
+                                {patient.diagnosis && (
+                                  <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
+                                )}
+                                {patient.surgeonName && (
+                                  <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName}</div>
+                                )}
+                              </div>
+                            );
+                          })() : (
                             <button
                               className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex flex-col items-center justify-center gap-0.5 ${GROUP_COLORS[group]}`}
                               onClick={() => openSlot(dayStr, slotName)}

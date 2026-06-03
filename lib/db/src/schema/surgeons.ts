@@ -9,6 +9,8 @@ export const surgeonsTable = pgTable("surgeons", {
   specialty: text("specialty"),
   phone: text("phone"),
   username: text("username"),
+  bgColor: text("bg_color"),
+  textColor: text("text_color"),
   isActive: boolean("is_active").notNull().default(true),
 });
 

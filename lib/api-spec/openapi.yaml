@@ -530,6 +530,12 @@ components:
           type: ["string", "null"]
         phone:
           type: ["string", "null"]
+        bgColor:
+          type: ["string", "null"]
+          description: "Naptár háttérszín (CSS hex, pl. #ff9933)"
+        textColor:
+          type: ["string", "null"]
+          description: "Naptár betűszín (CSS hex, pl. #ffffff)"
         isActive:
           type: boolean
 

@@ -134,6 +134,16 @@ export interface Surgeon {
   specialty?: string | null;
   /** @nullable */
   phone?: string | null;
+  /**
+     * Naptár háttérszín (CSS hex, pl. #ff9933)
+     * @nullable
+     */
+  bgColor?: string | null;
+  /**
+     * Naptár betűszín (CSS hex, pl. #ffffff)
+     * @nullable
+     */
+  textColor?: string | null;
   isActive?: boolean;
 }
 

@@ -164,6 +164,8 @@ export const ListSurgeonsResponseItem = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 })
 export const ListSurgeonsResponse = zod.array(ListSurgeonsResponseItem)
@@ -219,6 +221,8 @@ export const ListSurgeriesResponseItem = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 }).optional(),
   "createdAt": zod.coerce.date(),
@@ -288,6 +292,8 @@ export const GetSurgeryResponse = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 }).optional(),
   "createdAt": zod.coerce.date(),
@@ -352,6 +358,8 @@ export const UpdateSurgeryResponse = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 }).optional(),
   "createdAt": zod.coerce.date(),
@@ -428,6 +436,8 @@ export const GetCalendarSurgeriesResponseItem = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 }).optional(),
   "createdAt": zod.coerce.date(),
@@ -505,6 +515,8 @@ export const GetRecentActivityResponseItem = zod.object({
   "firstName": zod.string(),
   "specialty": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "bgColor": zod.string().nullish().describe('Naptár háttérszín (CSS hex, pl. #ff9933)'),
+  "textColor": zod.string().nullish().describe('Naptár betűszín (CSS hex, pl. #ffffff)'),
   "isActive": zod.boolean().optional()
 }).optional(),
   "createdAt": zod.coerce.date(),
