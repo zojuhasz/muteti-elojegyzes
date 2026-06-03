@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/", label: "Vezérlőpult", icon: LayoutDashboard },
-    { href: "/felvetel", label: "Felvételi naptár", icon: CalendarDays },
+    { href: "/felvetel", label: "Előjegyzés", icon: CalendarDays },
     { href: "/naptar", label: "Műtéti naptár", icon: CalendarCheck },
     { href: "/betegek", label: "Betegek", icon: Users },
     { href: "/mutetek", label: "Műtétek", icon: Activity },
