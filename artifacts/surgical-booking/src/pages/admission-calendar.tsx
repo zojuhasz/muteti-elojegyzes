@@ -143,9 +143,8 @@ export default function AdmissionCalendar() {
           <div className="min-w-[700px]">
             <div
               className="grid gap-px bg-border rounded-t-lg overflow-hidden"
-              style={{ gridTemplateColumns: `48px repeat(${weekdays.length}, 1fr)` }}
+              style={{ gridTemplateColumns: `repeat(${weekdays.length}, 1fr)` }}
             >
-              <div className="bg-muted/50 px-2 py-2 text-xs font-medium text-muted-foreground text-center">#</div>
               {weekdays.map(day => {
                 const dayStr = format(day, "yyyy-MM-dd");
                 const isToday = dayStr === todayStr;
@@ -168,13 +167,8 @@ export default function AdmissionCalendar() {
                 <div
                   key={slotLabel}
                   className="grid gap-px bg-border"
-                  style={{ gridTemplateColumns: `48px repeat(${weekdays.length}, 1fr)` }}
+                  style={{ gridTemplateColumns: `repeat(${weekdays.length}, 1fr)` }}
                 >
-                  <div className="bg-card flex items-center justify-center py-2">
-                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${TYPE_FILLED[type]}`}>
-                      {slotLabel}
-                    </span>
-                  </div>
                   {weekdays.map(day => {
                     const dayStr = format(day, "yyyy-MM-dd");
                     const daySlots = slotsForDay(day);
@@ -182,18 +176,17 @@ export default function AdmissionCalendar() {
                     const isActive = typeIndex < typeCount;
 
                     if (!isActive) {
-                      return (
-                        <div key={dayStr} className="bg-muted/30 px-1 py-1 min-h-[52px]" />
-                      );
+                      return <div key={dayStr} className="h-0 overflow-hidden" />;
                     }
 
                     const typePatients = patientsFor(type, day);
                     const patient = typePatients[typeIndex] ?? null;
 
                     return (
-                      <div key={dayStr} className="bg-card px-1 py-1 min-h-[52px]">
+                      <div key={dayStr} className="bg-card px-1 py-1 min-h-[60px]">
                         {patient ? (
                           <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${TYPE_FILLED[type]}`}>
+                            <div className={`text-[10px] font-bold mb-0.5 opacity-60`}>{slotLabel}</div>
                             <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
                             {patient.diagnosis && (
                               <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
@@ -201,12 +194,12 @@ export default function AdmissionCalendar() {
                           </div>
                         ) : (
                           <button
-                            className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex items-center justify-center gap-1 ${TYPE_COLORS[type]}`}
+                            className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex flex-col items-center justify-center gap-0.5 ${TYPE_COLORS[type]}`}
                             onClick={() => openSlot(dayStr, type, typeIndex)}
                             title={`${TYPE_LABEL[type]} beteg felvétele — ${dayStr}`}
                           >
-                            <UserPlus className="w-3 h-3 opacity-60" />
-                            <span className="opacity-60">Felvesz</span>
+                            <span className="font-bold opacity-70">{slotLabel}</span>
+                            <span className="opacity-50 text-[10px]">Felvesz</span>
                           </button>
                         )}
                       </div>
