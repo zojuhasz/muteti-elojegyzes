@@ -13,24 +13,24 @@ import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
 const TYPE_COLORS: Record<string, string> = {
-  T: "bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100",
+  Tu: "bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100",
   J: "bg-green-50 text-green-700 border-green-200 hover:bg-green-100",
   S: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100",
 };
 
 const TYPE_FILLED: Record<string, string> = {
-  T: "bg-blue-100 text-blue-900 border-blue-300",
+  Tu: "bg-blue-100 text-blue-900 border-blue-300",
   J: "bg-green-100 text-green-800 border-green-300",
   S: "bg-red-100 text-red-800 border-red-300",
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  T: "Tervezett",
+  Tu: "Tumoros",
   J: "Járóbeteg",
   S: "Sürgős",
 };
 
-const DAILY_SLOTS: string[] = ["T", "T", "T", "T", "J", "J", "S"];
+const DAILY_SLOTS: string[] = ["Tu", "Tu", "Tu", "Tu", "J", "J", "S"];
 
 type SlotClick = { date: string; type: string; slotIndex: number };
 
@@ -194,7 +194,7 @@ export default function AdmissionCalendar() {
             <span className="font-bold">{code}</span> — {label}
           </div>
         ))}
-        <span className="text-muted-foreground self-center">Napirend: T T T T J J S</span>
+        <span className="text-muted-foreground self-center">Napirend: Tu Tu Tu Tu J J S</span>
       </div>
 
       <Dialog open={!!slot} onOpenChange={open => !open && setSlot(null)}>
