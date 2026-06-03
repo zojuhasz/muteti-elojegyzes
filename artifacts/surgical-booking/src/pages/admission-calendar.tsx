@@ -30,7 +30,24 @@ const TYPE_LABEL: Record<string, string> = {
   S: "Sürgős",
 };
 
-const DAILY_SLOTS: string[] = ["Tu", "Tu", "Tu", "Tu", "J", "J", "S"];
+const DEFAULT_SLOTS: string[] = ["Tu", "Tu", "Tu", "Tu", "J", "J", "S"];
+const TUESDAY_SLOTS: string[] = ["Tu", "Tu", "J", "J", "J", "J", "S"];
+
+function slotsForDay(day: Date): string[] {
+  return day.getDay() === 2 ? TUESDAY_SLOTS : DEFAULT_SLOTS;
+}
+
+const ALL_ROWS: { type: string; typeIndex: number }[] = [
+  { type: "Tu", typeIndex: 0 },
+  { type: "Tu", typeIndex: 1 },
+  { type: "Tu", typeIndex: 2 },
+  { type: "Tu", typeIndex: 3 },
+  { type: "J",  typeIndex: 0 },
+  { type: "J",  typeIndex: 1 },
+  { type: "J",  typeIndex: 2 },
+  { type: "J",  typeIndex: 3 },
+  { type: "S",  typeIndex: 0 },
+];
 
 type SlotClick = { date: string; type: string; slotIndex: number };
 
@@ -145,49 +162,57 @@ export default function AdmissionCalendar() {
               })}
             </div>
 
-            {DAILY_SLOTS.map((type, slotIdx) => {
-              const typeNum = DAILY_SLOTS.slice(0, slotIdx + 1).filter(t => t === type).length;
-              const slotLabel = `${type}${typeNum}`;
+            {ALL_ROWS.map(({ type, typeIndex }) => {
+              const slotLabel = `${type}${typeIndex + 1}`;
               return (
-              <div
-                key={slotIdx}
-                className="grid gap-px bg-border"
-                style={{ gridTemplateColumns: `48px repeat(${weekdays.length}, 1fr)` }}
-              >
-                <div className="bg-card flex items-center justify-center py-2">
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${TYPE_FILLED[type]}`}>
-                    {slotLabel}
-                  </span>
-                </div>
-                {weekdays.map(day => {
-                  const dayStr = format(day, "yyyy-MM-dd");
-                  const typePatients = patientsFor(type, day);
-                  const typeSlotsBefore = DAILY_SLOTS.slice(0, slotIdx).filter(t => t === type).length;
-                  const patient = typePatients[typeSlotsBefore] ?? null;
+                <div
+                  key={slotLabel}
+                  className="grid gap-px bg-border"
+                  style={{ gridTemplateColumns: `48px repeat(${weekdays.length}, 1fr)` }}
+                >
+                  <div className="bg-card flex items-center justify-center py-2">
+                    <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${TYPE_FILLED[type]}`}>
+                      {slotLabel}
+                    </span>
+                  </div>
+                  {weekdays.map(day => {
+                    const dayStr = format(day, "yyyy-MM-dd");
+                    const daySlots = slotsForDay(day);
+                    const typeCount = daySlots.filter(t => t === type).length;
+                    const isActive = typeIndex < typeCount;
 
-                  return (
-                    <div key={dayStr} className="bg-card px-1 py-1 min-h-[52px]">
-                      {patient ? (
-                        <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${TYPE_FILLED[type]}`}>
-                          <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
-                          {patient.diagnosis && (
-                            <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex items-center justify-center gap-1 ${TYPE_COLORS[type]}`}
-                          onClick={() => openSlot(dayStr, type, slotIdx)}
-                          title={`${TYPE_LABEL[type]} beteg felvétele — ${dayStr}`}
-                        >
-                          <UserPlus className="w-3 h-3 opacity-60" />
-                          <span className="opacity-60">Felvesz</span>
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    if (!isActive) {
+                      return (
+                        <div key={dayStr} className="bg-muted/30 px-1 py-1 min-h-[52px]" />
+                      );
+                    }
+
+                    const typePatients = patientsFor(type, day);
+                    const patient = typePatients[typeIndex] ?? null;
+
+                    return (
+                      <div key={dayStr} className="bg-card px-1 py-1 min-h-[52px]">
+                        {patient ? (
+                          <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${TYPE_FILLED[type]}`}>
+                            <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
+                            {patient.diagnosis && (
+                              <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            className={`w-full h-full rounded border border-dashed text-[11px] transition-colors flex items-center justify-center gap-1 ${TYPE_COLORS[type]}`}
+                            onClick={() => openSlot(dayStr, type, typeIndex)}
+                            title={`${TYPE_LABEL[type]} beteg felvétele — ${dayStr}`}
+                          >
+                            <UserPlus className="w-3 h-3 opacity-60" />
+                            <span className="opacity-60">Felvesz</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               );
             })}
           </div>
