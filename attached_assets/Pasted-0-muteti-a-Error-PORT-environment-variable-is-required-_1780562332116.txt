@@ -1,0 +1,91 @@
+0|muteti-a | Error: PORT environment variable is required but was not provided.
+0|muteti-a |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-a |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-a |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-a |     at async node:internal/modules/esm/loader:633:26
+0|muteti-a | Error: PORT environment variable is required but was not provided.
+0|muteti-a |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-a |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-a |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-a |     at async node:internal/modules/esm/loader:633:26
+0|muteti-a | Error: PORT environment variable is required but was not provided.
+0|muteti-a |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-a |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-a |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-a |     at async node:internal/modules/esm/loader:633:26
+0|muteti-a | Error: PORT environment variable is required but was not provided.
+0|muteti-a |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-a |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-a |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-a |     at async node:internal/modules/esm/loader:633:26
+
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
+0|muteti-api  | Error: PORT environment variable is required but was not provided.
+0|muteti-api  |     at <anonymous> (/opt/muteti/artifacts/api-server/src/index.ts:7:9)
+0|muteti-api  |     at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+0|muteti-api  |     at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+0|muteti-api  |     at async node:internal/modules/esm/loader:633:26
