@@ -1,7 +1,8 @@
 import { useState } from "react";
 import {
-  useGetCalendarSurgeries, useListOperatingRooms, useListPatients, useListSurgeons,
-  useCreateSurgery, useDeleteSurgery, getGetCalendarSurgeriesQueryKey,
+  useGetCalendarSurgeries, useListOperatingRooms, useListSurgeons,
+  useCreateSurgery, useCreatePatient, useDeleteSurgery,
+  getGetCalendarSurgeriesQueryKey, getListPatientsQueryKey,
   useGetDailyRoster, useUpsertDailyRoster, getGetDailyRosterQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Pencil, FileDown } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { hu } from "date-fns/locale";
@@ -49,14 +51,41 @@ function rosterVal(v: string | null | undefined) {
 
 type AssignState = { date: string; roomId: number; roomName: string } | null;
 
+const LATERALITY_OPTIONS = [
+  { value: "D", label: "D — Jobb" },
+  { value: "S", label: "S — Bal" },
+  { value: "U", label: "U — Kétoldali" },
+  { value: "N", label: "N — Nem vonatkozik" },
+];
+
+const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "0+", "0-", "ismeretlen"];
+
+const emptyForm = {
+  lastName: "",
+  firstName: "",
+  birthDate: "",
+  taj: "",
+  phone: "",
+  ward: "",
+  diagnosis: "",
+  surgery: "",
+  laparoscope: "" as "" | "igen" | "nem",
+  halo: "" as "" | "igen" | "nem",
+  laterality: "",
+  bloodType: "",
+  notes: "",
+  isDaySurgery: false,
+  surgeonId: "",
+  assistant1Id: "",
+  assistant2Id: "",
+  assistant3Id: "",
+  selTime: "08:00",
+};
+
 export default function SurgeryCalendar() {
   const [currentDay, setCurrentDay] = useState(() => new Date());
   const [assign, setAssign] = useState<AssignState>(null);
-  const [selPatient, setSelPatient] = useState("");
-  const [selSurgeon, setSelSurgeon] = useState("");
-  const [selTime, setSelTime] = useState("08:00");
-  const [selType, setSelType] = useState("");
-  const [selDuration, setSelDuration] = useState("");
+  const [form, setForm] = useState({ ...emptyForm });
   const [rosterOpen, setRosterOpen] = useState(false);
   const [rosterForm, setRosterForm] = useState({
     surgeryResponsible1: "", surgeryResponsible2: "",
@@ -71,14 +100,15 @@ export default function SurgeryCalendar() {
 
   const { data: surgeries, isLoading } = useGetCalendarSurgeries({ from: dayStr, to: dayStr });
   const { data: rooms } = useListOperatingRooms();
-  const { data: patients } = useListPatients();
   const { data: surgeons } = useListSurgeons();
   const { data: roster } = useGetDailyRoster(dayStr, { query: { queryKey: getGetDailyRosterQueryKey(dayStr), retry: false } });
+  const createPatient = useCreatePatient();
   const createSurgery = useCreateSurgery();
   const deleteSurgery = useDeleteSurgery();
   const upsertRoster = useUpsertDailyRoster();
 
   const activeRooms = rooms?.filter(r => r.isActive) ?? [];
+  const activeSurgeons = surgeons?.filter(s => s.isActive) ?? [];
 
   function surgeriesForRoom(roomId: number) {
     return (surgeries ?? [])
@@ -88,7 +118,17 @@ export default function SurgeryCalendar() {
 
   function openAssign(roomId: number, roomName: string) {
     setAssign({ date: dayStr, roomId, roomName });
-    setSelPatient(""); setSelSurgeon(""); setSelTime("08:00"); setSelType(""); setSelDuration("");
+    setForm({ ...emptyForm });
+  }
+
+  function setF<K extends keyof typeof emptyForm>(key: K, value: (typeof emptyForm)[K]) {
+    setForm(f => ({ ...f, [key]: value }));
+  }
+
+  function surgeonName(id: string): string {
+    if (!id) return "";
+    const s = activeSurgeons.find(s => String(s.id) === id);
+    return s ? `Dr. ${s.lastName} ${s.firstName}` : "";
   }
 
   function openRosterEdit() {
@@ -117,25 +157,56 @@ export default function SurgeryCalendar() {
   }
 
   function handleCreate() {
-    if (!assign || !selPatient || !selSurgeon) return;
-    const scheduledDate = new Date(`${assign.date}T${selTime}:00`).toISOString();
-    createSurgery.mutate({
+    if (!assign || !form.lastName || !form.firstName || !form.surgeonId) return;
+
+    const scheduledDate = new Date(`${assign.date}T${form.selTime}:00`).toISOString();
+
+    createPatient.mutate({
       data: {
-        patientId: Number(selPatient),
-        operatingRoomId: assign.roomId,
-        surgeonId: Number(selSurgeon),
-        scheduledDate,
-        surgeryType: selType || undefined,
-        estimatedDurationMinutes: selDuration ? Number(selDuration) : undefined,
+        lastName: form.lastName.trim(),
+        firstName: form.firstName.trim(),
+        birthDate: form.birthDate || "—",
+        taj: form.taj || undefined,
+        phone: form.phone || undefined,
+        ward: form.ward || undefined,
+        diagnosis: form.diagnosis || undefined,
+        surgery: form.surgery || undefined,
+        laparoscope: form.laparoscope || undefined,
+        halo: form.halo || undefined,
+        laterality: form.laterality || undefined,
+        bloodType: form.bloodType || undefined,
+        notes: form.notes || undefined,
+        isDaySurgery: form.isDaySurgery,
+        surgeonName: surgeonName(form.surgeonId) || undefined,
+        assistant1: surgeonName(form.assistant1Id) || undefined,
+        assistant2: surgeonName(form.assistant2Id) || undefined,
+        assistant3: surgeonName(form.assistant3Id) || undefined,
         status: "scheduled",
+        surgeryDate: assign.date,
+        orRoom: assign.roomName,
       },
     }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from: dayStr, to: dayStr }) });
-        toast({ title: "Műtét előjegyezve" });
-        setAssign(null);
+      onSuccess: (patient) => {
+        createSurgery.mutate({
+          data: {
+            patientId: patient.id,
+            operatingRoomId: assign.roomId,
+            surgeonId: Number(form.surgeonId),
+            scheduledDate,
+            surgeryType: form.surgery || undefined,
+            status: "scheduled",
+          },
+        }, {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getGetCalendarSurgeriesQueryKey({ from: dayStr, to: dayStr }) });
+            queryClient.invalidateQueries({ queryKey: getListPatientsQueryKey() });
+            toast({ title: "Beteg felvéve és előjegyezve" });
+            setAssign(null);
+          },
+          onError: () => toast({ title: "Beteg mentve, de az előjegyzés sikertelen", variant: "destructive" }),
+        });
       },
-      onError: () => toast({ title: "Hiba a mentés során", variant: "destructive" }),
+      onError: () => toast({ title: "Hiba a beteg mentésekor", variant: "destructive" }),
     });
   }
 
@@ -162,6 +233,8 @@ export default function SurgeryCalendar() {
   const startTime = rosterVal(roster?.surgeryStartTime);
   const hasRoster = r1 || r2 || a1 || a2 || amb || dayoff || abs || startTime;
   const isFallback = !!roster && roster.id === 0;
+
+  const isSaving = createPatient.isPending || createSurgery.isPending;
 
   return (
     <div className="space-y-4">
@@ -391,64 +464,261 @@ export default function SurgeryCalendar() {
         </DialogContent>
       </Dialog>
 
-      {/* Új műtét dialog */}
+      {/* Beteg felvétele + előjegyzés dialog */}
       <Dialog open={!!assign} onOpenChange={open => !open && setAssign(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="w-4 h-4 text-primary" />
-              Előjegyzés — {assign?.roomName}
+              Beteg felvétele — {assign?.roomName}
               <Badge variant="outline" className="ml-1 text-xs font-normal">{assign?.date}</Badge>
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1 col-span-2">
-                <Label className="text-xs">Beteg</Label>
-                <Select value={selPatient} onValueChange={setSelPatient}>
-                  <SelectTrigger data-testid="select-patient">
-                    <SelectValue placeholder="Válasszon beteget..." />
+
+          <div className="space-y-4 py-1">
+            {/* Aznapi műtét */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isDaySurgery"
+                checked={form.isDaySurgery}
+                onCheckedChange={v => setF("isDaySurgery", !!v)}
+              />
+              <Label htmlFor="isDaySurgery" className="cursor-pointer font-medium">Aznapi műtét</Label>
+            </div>
+
+            {/* Beteg neve */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Beteg neve — Vezetéknév <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="Kovács"
+                  value={form.lastName}
+                  onChange={e => setF("lastName", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Keresztnév <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="János"
+                  value={form.firstName}
+                  onChange={e => setF("firstName", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Születési dátum, TAJ */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Születési dátum</Label>
+                <Input
+                  type="date"
+                  value={form.birthDate}
+                  onChange={e => setF("birthDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">TAJ</Label>
+                <Input
+                  placeholder="123 456 789"
+                  value={form.taj}
+                  onChange={e => setF("taj", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Elérhetőség, Kórterem */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Elérhetőség</Label>
+                <Input
+                  placeholder="+36 30 123 4567"
+                  value={form.phone}
+                  onChange={e => setF("phone", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Kórterem</Label>
+                <Input
+                  placeholder="pl. 201"
+                  value={form.ward}
+                  onChange={e => setF("ward", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Diagnózis */}
+            <div className="space-y-1">
+              <Label className="text-xs">Diagnózis</Label>
+              <Input
+                placeholder="pl. K35 — Appendicitis acuta"
+                value={form.diagnosis}
+                onChange={e => setF("diagnosis", e.target.value)}
+              />
+            </div>
+
+            {/* Műtét megnevezése + időpont */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Műtét megnevezése</Label>
+                <Input
+                  placeholder="pl. Appendectomia"
+                  value={form.surgery}
+                  onChange={e => setF("surgery", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Tervezett időpont</Label>
+                <Input
+                  type="time"
+                  value={form.selTime}
+                  onChange={e => setF("selTime", e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Laparoszkóp, Háló */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Laparoszkóp?</Label>
+                <div className="flex gap-3 pt-1">
+                  {(["igen", "nem"] as const).map(v => (
+                    <label key={v} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        name="laparoscope"
+                        value={v}
+                        checked={form.laparoscope === v}
+                        onChange={() => setF("laparoscope", v)}
+                        className="accent-primary"
+                      />
+                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </label>
+                  ))}
+                  {form.laparoscope && (
+                    <button className="text-xs text-muted-foreground underline" onClick={() => setF("laparoscope", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Háló?</Label>
+                <div className="flex gap-3 pt-1">
+                  {(["igen", "nem"] as const).map(v => (
+                    <label key={v} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        name="halo"
+                        value={v}
+                        checked={form.halo === v}
+                        onChange={() => setF("halo", v)}
+                        className="accent-primary"
+                      />
+                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </label>
+                  ))}
+                  {form.halo && (
+                    <button className="text-xs text-muted-foreground underline" onClick={() => setF("halo", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Oldaliság, Vércsoport */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Oldaliság</Label>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {LATERALITY_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        name="laterality"
+                        value={opt.value}
+                        checked={form.laterality === opt.value}
+                        onChange={() => setF("laterality", opt.value)}
+                        className="accent-primary"
+                      />
+                      <span title={opt.label}>{opt.value}</span>
+                    </label>
+                  ))}
+                  {form.laterality && (
+                    <button className="text-xs text-muted-foreground underline" onClick={() => setF("laterality", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Vércsoport</Label>
+                <Select value={form.bloodType} onValueChange={v => setF("bloodType", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Válasszon..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {patients?.map(p => (
-                      <SelectItem key={p.id} value={String(p.id)}>
-                        {p.lastName} {p.firstName}{p.diagnosis ? ` — ${p.diagnosis}` : ""}
-                      </SelectItem>
+                    {BLOOD_TYPES.map(bt => (
+                      <SelectItem key={bt} value={bt}>{bt}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1 col-span-2">
-                <Label className="text-xs">Sebész</Label>
-                <Select value={selSurgeon} onValueChange={setSelSurgeon}>
-                  <SelectTrigger data-testid="select-surgeon">
-                    <SelectValue placeholder="Válasszon sebészt..." />
+            </div>
+
+            {/* Egyéb info */}
+            <div className="space-y-1">
+              <Label className="text-xs">Egyéb info</Label>
+              <Textarea
+                placeholder="Különleges körülmények, megjegyzések..."
+                rows={2}
+                value={form.notes}
+                onChange={e => setF("notes", e.target.value)}
+              />
+            </div>
+
+            <hr className="border-border" />
+
+            {/* Műtő orvos */}
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Műtő orvos <span className="text-red-500">*</span></Label>
+              <Select value={form.surgeonId} onValueChange={v => setF("surgeonId", v)}>
+                <SelectTrigger data-testid="select-surgeon">
+                  <SelectValue placeholder="Válasszon sebészt..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeSurgeons.map(s => (
+                    <SelectItem key={s.id} value={String(s.id)}>Dr. {s.lastName} {s.firstName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Asszisztensek */}
+            {([
+              ["assistant1Id", "Asszisztens 1."],
+              ["assistant2Id", "Asszisztens 2."],
+              ["assistant3Id", "Asszisztens 3."],
+            ] as const).map(([key, label]) => (
+              <div className="space-y-1" key={key}>
+                <Label className="text-xs">{label}</Label>
+                <Select value={form[key]} onValueChange={v => setF(key, v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
                   </SelectTrigger>
                   <SelectContent>
-                    {surgeons?.filter(s => s.isActive).map(s => (
+                    <SelectItem value="-">—</SelectItem>
+                    {activeSurgeons.map(s => (
                       <SelectItem key={s.id} value={String(s.id)}>Dr. {s.lastName} {s.firstName}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Időpont</Label>
-                <Input type="time" value={selTime} onChange={e => setSelTime(e.target.value)} data-testid="input-time" />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Időtartam (perc)</Label>
-                <Input type="number" placeholder="pl. 90" value={selDuration} onChange={e => setSelDuration(e.target.value)} data-testid="input-duration" />
-              </div>
-              <div className="space-y-1 col-span-2">
-                <Label className="text-xs">Műtét típusa</Label>
-                <Input placeholder="pl. Appendectomia" value={selType} onChange={e => setSelType(e.target.value)} data-testid="input-type" />
-              </div>
-            </div>
+            ))}
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="pt-2">
             <Button variant="outline" onClick={() => setAssign(null)}>Mégse</Button>
-            <Button onClick={handleCreate} disabled={!selPatient || !selSurgeon || createSurgery.isPending} data-testid="button-submit">
-              {createSurgery.isPending ? "Mentés..." : "Előjegyez"}
+            <Button
+              onClick={handleCreate}
+              disabled={!form.lastName || !form.firstName || !form.surgeonId || isSaving}
+              data-testid="button-submit"
+            >
+              {isSaving ? "Mentés..." : "Felvétel és előjegyzés"}
             </Button>
           </DialogFooter>
         </DialogContent>

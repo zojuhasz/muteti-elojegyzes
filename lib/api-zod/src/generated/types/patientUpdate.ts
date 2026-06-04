@@ -17,6 +17,22 @@ export interface PatientUpdate {
   phone?: string;
   notes?: string;
   diagnosis?: string;
+  /** Műtét neve / típusa */
+  surgery?: string;
+  surgeonName?: string;
+  assistant1?: string;
+  assistant2?: string;
+  assistant3?: string;
+  ward?: string;
+  orRoom?: string;
+  surgeryDate?: string;
+  bloodType?: string;
+  laterality?: string;
+  laparoscope?: string;
+  halo?: string;
+  isDaySurgery?: boolean;
+  surgeryOrder?: number;
+  anesthesia?: string;
   status?: PatientUpdateStatus;
   patientType?: string;
   admissionDate?: string;

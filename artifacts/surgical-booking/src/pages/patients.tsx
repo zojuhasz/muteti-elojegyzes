@@ -27,7 +27,7 @@ export default function Patients() {
 
   const { data: patients, isLoading } = useListPatients(
     hasSearch ? { search: search.trim() } : {},
-    { query: { enabled: hasSearch } },
+    { query: { enabled: hasSearch, queryKey: getListPatientsQueryKey(hasSearch ? { search: search.trim() } : {}) } },
   );
 
   const deletePatient = useDeletePatient();

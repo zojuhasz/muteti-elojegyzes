@@ -507,6 +507,51 @@ components:
           type: string
         diagnosis:
           type: string
+        surgery:
+          type: string
+          description: "Műtét neve / típusa"
+        surgeonName:
+          type: string
+          description: "Műtő orvos neve (szöveg)"
+        assistant1:
+          type: string
+          description: "1. asszisztens neve"
+        assistant2:
+          type: string
+          description: "2. asszisztens neve"
+        assistant3:
+          type: string
+          description: "3. asszisztens neve"
+        ward:
+          type: string
+          description: "Kórterem"
+        orRoom:
+          type: string
+          description: "Műtőterem megnevezése"
+        surgeryDate:
+          type: string
+          description: "YYYY-MM-DD formátum"
+        bloodType:
+          type: string
+          description: "Vércsoport"
+        laterality:
+          type: string
+          description: "Oldaliság: D, S, U, N"
+        laparoscope:
+          type: string
+          description: "Laparoszkópos műtét: igen / nem"
+        halo:
+          type: string
+          description: "Háló alkalmazása: igen / nem"
+        isDaySurgery:
+          type: boolean
+          description: "Aznapi műtét"
+        surgeryOrder:
+          type: integer
+          description: "Műtéti sorrend"
+        anesthesia:
+          type: string
+          description: "Altatás típusa"
         status:
           type: string
           enum: [waiting, scheduled, operated, cancelled, imported]
@@ -536,6 +581,37 @@ components:
         notes:
           type: string
         diagnosis:
+          type: string
+        surgery:
+          type: string
+          description: "Műtét neve / típusa"
+        surgeonName:
+          type: string
+        assistant1:
+          type: string
+        assistant2:
+          type: string
+        assistant3:
+          type: string
+        ward:
+          type: string
+        orRoom:
+          type: string
+        surgeryDate:
+          type: string
+        bloodType:
+          type: string
+        laterality:
+          type: string
+        laparoscope:
+          type: string
+        halo:
+          type: string
+        isDaySurgery:
+          type: boolean
+        surgeryOrder:
+          type: integer
+        anesthesia:
           type: string
         status:
           type: string

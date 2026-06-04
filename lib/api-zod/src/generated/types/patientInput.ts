@@ -17,6 +17,36 @@ export interface PatientInput {
   phone?: string;
   notes?: string;
   diagnosis?: string;
+  /** Műtét neve / típusa */
+  surgery?: string;
+  /** Műtő orvos neve (szöveg) */
+  surgeonName?: string;
+  /** 1. asszisztens neve */
+  assistant1?: string;
+  /** 2. asszisztens neve */
+  assistant2?: string;
+  /** 3. asszisztens neve */
+  assistant3?: string;
+  /** Kórterem */
+  ward?: string;
+  /** Műtőterem megnevezése */
+  orRoom?: string;
+  /** YYYY-MM-DD formátum */
+  surgeryDate?: string;
+  /** Vércsoport */
+  bloodType?: string;
+  /** Oldaliság: D, S, U, N */
+  laterality?: string;
+  /** Laparoszkópos műtét: igen / nem */
+  laparoscope?: string;
+  /** Háló alkalmazása: igen / nem */
+  halo?: string;
+  /** Aznapi műtét */
+  isDaySurgery?: boolean;
+  /** Műtéti sorrend */
+  surgeryOrder?: number;
+  /** Altatás típusa */
+  anesthesia?: string;
   status?: PatientInputStatus;
   /** T, J, vagy S */
   patientType?: string;
