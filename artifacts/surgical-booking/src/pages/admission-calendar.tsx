@@ -7,12 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, ChevronRight, UserPlus } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks, isWeekend } from "date-fns";
 import { hu } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
-// Hex szín kontrasztszínének meghatározása (sötét vagy világos szöveg)
 function autoTextColor(hex: string): string {
   const c = hex.replace(/^#/, "").trim();
   let r: number, g: number, b: number;
@@ -29,7 +30,6 @@ function autoTextColor(hex: string): string {
   return luminance > 0.55 ? "#1a1a1a" : "#ffffff";
 }
 
-// Slot névből csoport prefix kinyerése
 function slotGroup(slot: string): string {
   if (slot.startsWith("B"))   return "B";
   if (slot.startsWith("EP"))  return "EP";
@@ -65,45 +65,56 @@ const GROUP_LABEL: Record<string, string> = {
   Amb: "Ambuláns",
 };
 
-// Napfajta szerint slot-listák (sorrend fontos)
 const DAY_SLOTS: Record<number, string[]> = {
-  1: ["B-Zu","B-2","B-3","B-NM","EP-1","Tu-1","Tu-2","Tu-3","Tu-4","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],       // Hétfő (HK)
-  2: ["B-Zu","B-2","B-3","B-NM","EP-1","Tu-1","Tu-2","Tu-3","Tu-4","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],       // Kedd  (HK)
-  3: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","EP-3","Tu-1","Tu-2","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],       // Szerda  (SZCS)
-  4: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","EP-3","Tu-1","Tu-2","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],       // Csütörtök (SZCS)
-  5: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","Tu-1","Tu-2","Tu-3","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],       // Péntek (P)
+  1: ["B-Zu","B-2","B-3","B-NM","EP-1","Tu-1","Tu-2","Tu-3","Tu-4","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],
+  2: ["B-Zu","B-2","B-3","B-NM","EP-1","Tu-1","Tu-2","Tu-3","Tu-4","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],
+  3: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","EP-3","Tu-1","Tu-2","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],
+  4: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","EP-3","Tu-1","Tu-2","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],
+  5: ["B-Zu","B-2","B-3","B-NM","EP-1","EP-2","Tu-1","Tu-2","Tu-3","S-1","S-2","Amb-1","Amb-2","Amb-3","Amb-4"],
 };
-
-// Az összes lehetséges slot unióban, megjelenítési sorrendben
-const ALL_SLOTS = [
-  "B-Zu","B-2","B-3","B-NM",
-  "EP-1","EP-2","EP-3",
-  "Tu-1","Tu-2","Tu-3","Tu-4",
-  "S-1","S-2",
-  "Amb-1","Amb-2","Amb-3","Amb-4",
-];
 
 function slotsForDay(day: Date): string[] {
   return DAY_SLOTS[day.getDay()] ?? DAY_SLOTS[1];
 }
 
+const LATERALITY_OPTIONS = [
+  { value: "D", label: "D — Jobb" },
+  { value: "S", label: "S — Bal" },
+  { value: "U", label: "U — Kétoldali" },
+  { value: "N", label: "N — Nem vonatkozik" },
+];
+
+const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "0+", "0-", "ismeretlen"];
+
 type SlotClick = { date: string; slotName: string };
 
-type FormState = {
-  lastName: string;
-  firstName: string;
-  birthDate: string;
-  taj: string;
-  diagnosis: string;
-  notes: string;
+const EMPTY_FORM = {
+  isDaySurgery: false,
+  lastName: "",
+  firstName: "",
+  birthDate: "",
+  taj: "",
+  phone: "",
+  ward: "",
+  diagnosis: "",
+  surgery: "",
+  laparoscope: "" as "" | "igen" | "nem",
+  halo: "" as "" | "igen" | "nem",
+  laterality: "",
+  bloodType: "",
+  notes: "",
+  surgeonId: "",
+  assistant1Id: "",
+  assistant2Id: "",
+  assistant3Id: "",
 };
 
-const EMPTY_FORM: FormState = { lastName: "", firstName: "", birthDate: "", taj: "", diagnosis: "", notes: "" };
+type FormState = typeof EMPTY_FORM;
 
 export default function AdmissionCalendar() {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [slot, setSlot] = useState<SlotClick | null>(null);
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -113,6 +124,8 @@ export default function AdmissionCalendar() {
   const { data: patients, isLoading } = useGetAdmissionCalendar({ from, to });
   const { data: surgeons } = useListSurgeons();
   const createPatient = useCreatePatient();
+
+  const activeSurgeons = useMemo(() => surgeons?.filter(s => s.isActive) ?? [], [surgeons]);
 
   const surgeonColorMap = useMemo(() => {
     const map = new Map<string, { bg: string; text: string }>();
@@ -128,7 +141,6 @@ export default function AdmissionCalendar() {
 
   const weekdays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).filter(d => !isWeekend(d));
 
-  // Beteg keresése pontos slot név + nap alapján
   function patientForSlot(slotName: string, day: Date) {
     const dayStr = format(day, "yyyy-MM-dd");
     return patients?.find(p => p.patientType === slotName && p.admissionDate === dayStr) ?? null;
@@ -136,23 +148,41 @@ export default function AdmissionCalendar() {
 
   function openSlot(date: string, slotName: string) {
     setSlot({ date, slotName });
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM });
   }
 
-  function handleField(field: keyof FormState, value: string) {
-    setForm(f => ({ ...f, [field]: value }));
+  function setF<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm(f => ({ ...f, [key]: value }));
+  }
+
+  function surgeonName(id: string): string {
+    if (!id || id === "-") return "";
+    const s = activeSurgeons.find(s => String(s.id) === id);
+    return s ? `Dr. ${s.lastName} ${s.firstName}` : "";
   }
 
   function handleSubmit() {
-    if (!slot || !form.lastName.trim() || !form.firstName.trim() || !form.birthDate) return;
+    if (!slot || !form.lastName.trim() || !form.firstName.trim()) return;
     createPatient.mutate({
       data: {
         lastName: form.lastName.trim(),
         firstName: form.firstName.trim(),
-        birthDate: new Date(form.birthDate) as never,
+        birthDate: form.birthDate || "—",
         taj: form.taj.trim() || undefined,
+        phone: form.phone.trim() || undefined,
+        ward: form.ward.trim() || undefined,
         diagnosis: form.diagnosis.trim() || undefined,
+        surgery: form.surgery.trim() || undefined,
+        laparoscope: form.laparoscope || undefined,
+        halo: form.halo || undefined,
+        laterality: form.laterality || undefined,
+        bloodType: form.bloodType || undefined,
         notes: form.notes.trim() || undefined,
+        isDaySurgery: form.isDaySurgery,
+        surgeonName: surgeonName(form.surgeonId) || undefined,
+        assistant1: surgeonName(form.assistant1Id) || undefined,
+        assistant2: surgeonName(form.assistant2Id) || undefined,
+        assistant3: surgeonName(form.assistant3Id) || undefined,
         patientType: slot.slotName,
         admissionDate: slot.date,
         status: "waiting",
@@ -170,6 +200,7 @@ export default function AdmissionCalendar() {
   }
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
+  const canSubmit = !!form.lastName.trim() && !!form.firstName.trim() && !createPatient.isPending;
 
   return (
     <div className="space-y-5">
@@ -193,7 +224,6 @@ export default function AdmissionCalendar() {
       ) : (
         <div className="overflow-x-auto">
           <div className="min-w-[700px]">
-            {/* Fejléc */}
             <div
               className="grid gap-px bg-border rounded-t-lg overflow-hidden"
               style={{ gridTemplateColumns: `repeat(${weekdays.length}, 1fr)` }}
@@ -214,7 +244,6 @@ export default function AdmissionCalendar() {
               })}
             </div>
 
-            {/* Oszlopok — minden nap csak a saját aktív slotjait mutatja */}
             <div className="flex gap-px bg-border">
               {weekdays.map(day => {
                 const dayStr = format(day, "yyyy-MM-dd");
@@ -235,29 +264,17 @@ export default function AdmissionCalendar() {
                               >
                                 <div className="text-[10px] font-bold mb-0.5" style={{ opacity: 0.7 }}>{slotName}</div>
                                 <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
-                                {patient.diagnosis && (
-                                  <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.diagnosis}</div>
-                                )}
-                                {patient.surgery && (
-                                  <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.surgery}</div>
-                                )}
-                                {patient.surgeonName && (
-                                  <div className="text-[10px] truncate mt-0.5 italic" style={{ opacity: 0.75 }}>{patient.surgeonName}</div>
-                                )}
+                                {patient.diagnosis && <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.diagnosis}</div>}
+                                {patient.surgery && <div className="text-[10px] truncate" style={{ opacity: 0.8 }}>{patient.surgery}</div>}
+                                {patient.surgeonName && <div className="text-[10px] truncate mt-0.5 italic" style={{ opacity: 0.75 }}>{patient.surgeonName}</div>}
                               </div>
                             ) : (
                               <div className={`h-full rounded border px-2 py-1.5 text-xs leading-snug ${GROUP_FILLED[group]}`}>
                                 <div className="text-[10px] font-bold mb-0.5 opacity-60">{slotName}</div>
                                 <div className="font-semibold">{patient.lastName} {patient.firstName}</div>
-                                {patient.diagnosis && (
-                                  <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>
-                                )}
-                                {patient.surgery && (
-                                  <div className="text-[10px] opacity-70 truncate">{patient.surgery}</div>
-                                )}
-                                {patient.surgeonName && (
-                                  <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName}</div>
-                                )}
+                                {patient.diagnosis && <div className="text-[10px] opacity-70 truncate">{patient.diagnosis}</div>}
+                                {patient.surgery && <div className="text-[10px] opacity-70 truncate">{patient.surgery}</div>}
+                                {patient.surgeonName && <div className="text-[10px] opacity-60 truncate mt-0.5 italic">{patient.surgeonName}</div>}
                               </div>
                             );
                           })() : (
@@ -290,9 +307,9 @@ export default function AdmissionCalendar() {
         ))}
       </div>
 
-      {/* Felvétel dialog */}
+      {/* Beteg felvétele dialog */}
       <Dialog open={!!slot} onOpenChange={open => !open && setSlot(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-primary" />
@@ -302,20 +319,30 @@ export default function AdmissionCalendar() {
                   {slot.slotName}
                 </span>
               )}
+              {slot && <span className="text-xs font-normal text-muted-foreground">{slot.date}</span>}
             </DialogTitle>
-            {slot && (
-              <p className="text-sm text-muted-foreground">{slot.date}</p>
-            )}
           </DialogHeader>
 
-          <div className="space-y-3 py-1">
+          <div className="space-y-4 py-1">
+
+            {/* Aznapi műtét */}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isDaySurgery"
+                checked={form.isDaySurgery}
+                onCheckedChange={v => setF("isDaySurgery", !!v)}
+              />
+              <Label htmlFor="isDaySurgery" className="cursor-pointer font-medium">Aznapi műtét</Label>
+            </div>
+
+            {/* Beteg neve */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label className="text-xs">Vezetéknév <span className="text-destructive">*</span></Label>
                 <Input
                   placeholder="pl. Kiss"
                   value={form.lastName}
-                  onChange={e => handleField("lastName", e.target.value)}
+                  onChange={e => setF("lastName", e.target.value)}
                   autoFocus
                 />
               </div>
@@ -324,56 +351,209 @@ export default function AdmissionCalendar() {
                 <Input
                   placeholder="pl. János"
                   value={form.firstName}
-                  onChange={e => handleField("firstName", e.target.value)}
+                  onChange={e => setF("firstName", e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">Születési dátum <span className="text-destructive">*</span></Label>
-              <Input
-                type="date"
-                value={form.birthDate}
-                onChange={e => handleField("birthDate", e.target.value)}
-              />
+            {/* Születési dátum, TAJ */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Születési dátum</Label>
+                <Input
+                  type="date"
+                  value={form.birthDate}
+                  onChange={e => setF("birthDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">TAJ</Label>
+                <Input
+                  placeholder="000 000 000"
+                  value={form.taj}
+                  onChange={e => setF("taj", e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <Label className="text-xs">TAJ szám</Label>
-              <Input
-                placeholder="000 000 000"
-                value={form.taj}
-                onChange={e => handleField("taj", e.target.value)}
-              />
+            {/* Elérhetőség, Kórterem */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Elérhetőség</Label>
+                <Input
+                  placeholder="+36 30 123 4567"
+                  value={form.phone}
+                  onChange={e => setF("phone", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Kórterem</Label>
+                <Input
+                  placeholder="pl. 201"
+                  value={form.ward}
+                  onChange={e => setF("ward", e.target.value)}
+                />
+              </div>
             </div>
 
+            {/* Diagnózis */}
             <div className="space-y-1">
-              <Label className="text-xs">Diagnózis / beavatkozás</Label>
+              <Label className="text-xs">Diagnózis</Label>
               <Input
-                placeholder="pl. Epekő műtét"
+                placeholder="pl. K35 — Appendicitis acuta"
                 value={form.diagnosis}
-                onChange={e => handleField("diagnosis", e.target.value)}
+                onChange={e => setF("diagnosis", e.target.value)}
               />
             </div>
 
+            {/* Műtét megnevezése */}
             <div className="space-y-1">
-              <Label className="text-xs">Megjegyzés</Label>
+              <Label className="text-xs">Műtét megnevezése</Label>
+              <Input
+                placeholder="pl. Appendectomia"
+                value={form.surgery}
+                onChange={e => setF("surgery", e.target.value)}
+              />
+            </div>
+
+            {/* Laparoszkóp, Háló */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Laparoszkóp?</Label>
+                <div className="flex gap-4 pt-1">
+                  {(["igen", "nem"] as const).map(v => (
+                    <label key={v} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        name="laparoscope"
+                        value={v}
+                        checked={form.laparoscope === v}
+                        onChange={() => setF("laparoscope", v)}
+                        className="accent-primary"
+                      />
+                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </label>
+                  ))}
+                  {form.laparoscope && (
+                    <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setF("laparoscope", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Háló?</Label>
+                <div className="flex gap-4 pt-1">
+                  {(["igen", "nem"] as const).map(v => (
+                    <label key={v} className="flex items-center gap-1.5 cursor-pointer text-sm">
+                      <input
+                        type="radio"
+                        name="halo"
+                        value={v}
+                        checked={form.halo === v}
+                        onChange={() => setF("halo", v)}
+                        className="accent-primary"
+                      />
+                      {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </label>
+                  ))}
+                  {form.halo && (
+                    <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setF("halo", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Oldaliság, Vércsoport */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Oldaliság</Label>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  {LATERALITY_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer text-sm" title={opt.label}>
+                      <input
+                        type="radio"
+                        name="laterality"
+                        value={opt.value}
+                        checked={form.laterality === opt.value}
+                        onChange={() => setF("laterality", opt.value)}
+                        className="accent-primary"
+                      />
+                      {opt.value}
+                    </label>
+                  ))}
+                  {form.laterality && (
+                    <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setF("laterality", "")}>töröl</button>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Vércsoport</Label>
+                <Select value={form.bloodType} onValueChange={v => setF("bloodType", v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BLOOD_TYPES.map(bt => (
+                      <SelectItem key={bt} value={bt}>{bt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Egyéb info */}
+            <div className="space-y-1">
+              <Label className="text-xs">Egyéb info</Label>
               <Textarea
-                placeholder="Egyéb tudnivalók..."
-                className="resize-none"
+                placeholder="Különleges körülmények, megjegyzések..."
                 rows={2}
                 value={form.notes}
-                onChange={e => handleField("notes", e.target.value)}
+                onChange={e => setF("notes", e.target.value)}
               />
             </div>
+
+            <hr className="border-border" />
+
+            {/* Műtő orvos */}
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Műtő orvos</Label>
+              <Select value={form.surgeonId} onValueChange={v => setF("surgeonId", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Válasszon sebészt..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeSurgeons.map(s => (
+                    <SelectItem key={s.id} value={String(s.id)}>Dr. {s.lastName} {s.firstName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Asszisztensek */}
+            {([
+              ["assistant1Id", "Asszisztens 1."],
+              ["assistant2Id", "Asszisztens 2."],
+              ["assistant3Id", "Asszisztens 3."],
+            ] as const).map(([key, label]) => (
+              <div className="space-y-1" key={key}>
+                <Label className="text-xs">{label}</Label>
+                <Select value={form[key]} onValueChange={v => setF(key, v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="-">—</SelectItem>
+                    {activeSurgeons.map(s => (
+                      <SelectItem key={s.id} value={String(s.id)}>Dr. {s.lastName} {s.firstName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setSlot(null)}>Mégse</Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!form.lastName.trim() || !form.firstName.trim() || !form.birthDate || createPatient.isPending}
-            >
+            <Button onClick={handleSubmit} disabled={!canSubmit}>
               {createPatient.isPending ? "Mentés..." : "Beteg felvétele"}
             </Button>
           </DialogFooter>
