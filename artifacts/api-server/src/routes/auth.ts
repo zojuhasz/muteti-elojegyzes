@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { verifyDrupalPassword } from "../lib/drupalPassword";
 
 const router = Router();
 
@@ -19,9 +22,28 @@ router.post("/auth/login", async (req, res) => {
 
   const { username, password } = parsed.data;
 
-  if (password !== SHARED_PASSWORD) {
-    res.status(401).json({ error: "Hibás jelszó" });
-    return;
+  // Per-user Drupal jelszó ellenőrzés
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.username, username.trim()))
+    .limit(1);
+
+  if (user) {
+    if (!user.isActive) {
+      res.status(401).json({ error: "A felhasználó inaktív" });
+      return;
+    }
+    if (!verifyDrupalPassword(password, user.passwordHash)) {
+      res.status(401).json({ error: "Hibás jelszó" });
+      return;
+    }
+  } else {
+    // Fallback: közös jelszó (ha nincs users táblában)
+    if (password !== SHARED_PASSWORD) {
+      res.status(401).json({ error: "Hibás felhasználónév vagy jelszó" });
+      return;
+    }
   }
 
   req.session.username = username.trim();
